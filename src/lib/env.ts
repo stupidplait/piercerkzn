@@ -26,6 +26,14 @@ import { z } from "zod";
 const isProd = process.env.NODE_ENV === "production";
 
 /**
+ * During `next build`, NODE_ENV is forced to "production" but runtime env
+ * vars (DB, secrets) may not be available. We never throw at module
+ * evaluation time — this allows the build to complete. Instead, the
+ * `requiredInProd` fields will be `undefined` and the consuming modules
+ * will fail at request time if the vars are truly missing.
+ */
+
+/**
  * Build a string field that is "optional in dev/test, required in prod".
  *
  * We attach the production check via `superRefine` so a missing value in
@@ -127,11 +135,12 @@ export type Env = z.infer<typeof envSchema>;
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success && isProd) {
-    // Production: surface every issue and abort the process. The error
-    // message lists each issue separated by `; ` so the operator sees the
-    // full set in a single line of stderr.
+    // Production: log all issues but do NOT throw at module evaluation time.
+    // Throwing here kills `next build` (which forces NODE_ENV=production)
+    // and serverless cold-starts where env vars arrive late. The consuming
+    // modules will fail at request time if a required var is truly missing.
     const issues = parsed.error.issues.map((i) => i.message).join("; ");
-    throw new Error(`[env] invalid configuration: ${issues}`);
+    console.error(`[env] invalid configuration: ${issues}`);
 }
 
 if (!parsed.success) {
@@ -144,4 +153,16 @@ if (!parsed.success) {
     console.warn(`[env] using defaults — invalid configuration: ${issues}`);
 }
 
-export const env: Env = parsed.success ? parsed.data : envSchema.parse({});
+// Fallback: parse an empty object with defaults. Use safeParse to avoid
+// throwing from the requiredInProd superRefine (which fires because
+// NODE_ENV=production during `next build`).
+const fallback = envSchema.safeParse({});
+export const env: Env = parsed.success
+    ? parsed.data
+    : fallback.success
+      ? fallback.data
+      : ({
+            NODE_ENV: "production",
+            CAPTCHA_PROVIDER: "disabled",
+            CAPTCHA_DEV_BYPASS: "0",
+        } as unknown as Env);
