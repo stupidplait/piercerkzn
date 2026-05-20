@@ -66,33 +66,48 @@ export const intLikeSchema = z
     .transform((v) => Number(v))
     .optional();
 
-export const envSchema = z.object({
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+export const envSchema = z
+    .object({
+        NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
-    // ----- Captcha -----------------------------------------------------------
-    CAPTCHA_PROVIDER: z.enum(["hcaptcha", "turnstile", "disabled"]).default("disabled"),
-    CAPTCHA_SECRET_KEY: requiredInProd("CAPTCHA_SECRET_KEY"),
-    CAPTCHA_SITE_KEY: z.string().optional(),
-    CAPTCHA_EXPECTED_HOSTNAME: z.string().optional(),
-    CAPTCHA_VERIFY_TIMEOUT_MS: intLikeSchema,
-    CAPTCHA_DEV_BYPASS: z.enum(["0", "1"]).default("0"),
+        // ----- Captcha -----------------------------------------------------------
+        CAPTCHA_PROVIDER: z.enum(["hcaptcha", "turnstile", "disabled"]).default("disabled"),
+        CAPTCHA_SECRET_KEY: z.string().min(1).optional(),
+        CAPTCHA_SITE_KEY: z.string().optional(),
+        CAPTCHA_EXPECTED_HOSTNAME: z.string().optional(),
+        CAPTCHA_VERIFY_TIMEOUT_MS: intLikeSchema,
+        CAPTCHA_DEV_BYPASS: z.enum(["0", "1"]).default("0"),
 
-    // ----- Rate limits — all optional, fall back to in-code DEFS -----------
-    CONTACT_RL_LIMIT: intLikeSchema,
-    CONTACT_RL_WINDOW: windowSchema,
-    CONTACT_USER_RL_LIMIT: intLikeSchema,
-    CONTACT_USER_RL_WINDOW: windowSchema,
-    RESERVATION_RL_LIMIT: intLikeSchema,
-    RESERVATION_RL_WINDOW: windowSchema,
-    RESERVATION_USER_RL_LIMIT: intLikeSchema,
-    RESERVATION_USER_RL_WINDOW: windowSchema,
+        // ----- Rate limits — all optional, fall back to in-code DEFS -----------
+        CONTACT_RL_LIMIT: intLikeSchema,
+        CONTACT_RL_WINDOW: windowSchema,
+        CONTACT_USER_RL_LIMIT: intLikeSchema,
+        CONTACT_USER_RL_WINDOW: windowSchema,
+        RESERVATION_RL_LIMIT: intLikeSchema,
+        RESERVATION_RL_WINDOW: windowSchema,
+        RESERVATION_USER_RL_LIMIT: intLikeSchema,
+        RESERVATION_USER_RL_WINDOW: windowSchema,
 
-    // ----- CORS --------------------------------------------------------------
-    CORS_ALLOWED_ORIGINS: requiredInProd("CORS_ALLOWED_ORIGINS"),
+        // ----- CORS --------------------------------------------------------------
+        CORS_ALLOWED_ORIGINS: requiredInProd("CORS_ALLOWED_ORIGINS"),
 
-    // ----- Cron / internal-bypass detection ---------------------------------
-    CRON_SECRET: z.string().optional(),
-});
+        // ----- Cron / internal-bypass detection ---------------------------------
+        CRON_SECRET: z.string().optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (
+            isProd &&
+            data.CAPTCHA_PROVIDER !== "disabled" &&
+            (!data.CAPTCHA_SECRET_KEY || data.CAPTCHA_SECRET_KEY.trim().length === 0)
+        ) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message:
+                    "CAPTCHA_SECRET_KEY is required in production when CAPTCHA_PROVIDER is not disabled",
+                path: ["CAPTCHA_SECRET_KEY"],
+            });
+        }
+    });
 
 export type Env = z.infer<typeof envSchema>;
 
