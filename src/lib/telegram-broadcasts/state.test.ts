@@ -8,9 +8,8 @@
  *
  * Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { describe, expect, it } from "vitest";
-import fc from "fast-check";
-
 import {
     TRANSITIONS,
     allowedActions,

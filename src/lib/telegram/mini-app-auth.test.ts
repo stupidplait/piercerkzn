@@ -23,10 +23,10 @@
  * matches what a real Telegram client emits and what `verifyInitData` reads
  * back through the iterator.
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { Buffer } from "node:buffer";
 import { createHash, createHmac } from "node:crypto";
 
-import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 import { verifyInitData } from "./mini-app-auth";

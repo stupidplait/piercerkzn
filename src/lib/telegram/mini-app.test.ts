@@ -1,6 +1,5 @@
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-import fc from "fast-check";
 
 import { isTelegramMiniApp, isTelegramMiniAppFromParams, TG_MINI_COOKIE } from "./mini-app";
 

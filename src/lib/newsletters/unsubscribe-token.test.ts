@@ -9,9 +9,8 @@
  *   - Property 13: Token round-trip is deterministic and verifiable
  *   - Property 14: Tampered tokens / cross-namespace tokens never validate
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { describe, expect, it } from "vitest";
-import fc from "fast-check";
-
 process.env.AUTH_SECRET = "test-secret-deterministic-newsletter";
 
 import { buildUnsubscribeToken, verifyUnsubscribeToken } from "./unsubscribe-token";

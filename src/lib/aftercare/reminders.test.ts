@@ -12,9 +12,8 @@
  *   - Property 10: Aftercare log-type strings
  *   - Property 11: Sweeper covers every step
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import fc from "fast-check";
-
 // ---------------------------------------------------------------------------
 // Hoisted mocks — the module under test eagerly imports these at top-level,
 // so we have to hoist their fakes via `vi.hoisted()` to make them visible

@@ -10,9 +10,8 @@
  *   - Property 1: State machine transitions match the published table
  *   - Property 2: Rejected transitions never leak a value outside the result set
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { describe, expect, it } from "vitest";
-import fc from "fast-check";
-
 import {
     TRANSITIONS,
     allowedActions,

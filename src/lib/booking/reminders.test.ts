@@ -12,9 +12,8 @@
  *   - Property 4:  Default-true email opt-in
  *   - sendBookingReminderIfDue unit coverage for both kinds (24h / 2h)
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import fc from "fast-check";
-
 // ---------------------------------------------------------------------------
 // Hoisted mocks
 // ---------------------------------------------------------------------------

@@ -7,9 +7,8 @@
  *
  * Validates: Requirements 7.1, 7.2, 7.3
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { describe, expect, it } from "vitest";
-import fc from "fast-check";
-
 import type { TelegramBroadcast } from "@/db";
 
 import { renderBroadcastPayload } from "./render";

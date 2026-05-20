@@ -1,4 +1,5 @@
 // Feature: public-form-abuse-hardening, Property 21: fcAssert numRuns floor
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 // We mock the fast-check module to intercept fc.assert calls and capture params

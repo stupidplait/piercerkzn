@@ -10,9 +10,8 @@
  *
  * Validates: Requirements 2.7, 3.5
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { describe, expect, it } from "vitest";
-import fc from "fast-check";
-
 import {
     type BookCallback,
     type ReserveCallback,

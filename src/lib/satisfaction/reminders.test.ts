@@ -10,9 +10,8 @@
  *   - Property 14: Satisfaction log row schema
  *   - Property 21 (satisfaction half): Studio-local fire instants
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import fc from "fast-check";
-
 // ---------------------------------------------------------------------------
 // Hoisted mocks
 // ---------------------------------------------------------------------------

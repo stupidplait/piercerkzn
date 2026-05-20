@@ -14,9 +14,8 @@
  *   - Property 6: TTL discriminator (29:59 returns; 30:01 returns null + clears)
  *   - Property 7: FSM round-trip
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import fc from "fast-check";
-
 // ---------------------------------------------------------------------------
 // Hoisted DB mock — see app/src/lib/booking/reminders.test.ts for the pattern.
 // ---------------------------------------------------------------------------

@@ -21,8 +21,8 @@
  *   - Property 11: Raw HTML / scripts demote to escaped text
  *   - Property 12: URL scheme allowlist
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { describe, expect, it } from "vitest";
-import fc from "fast-check";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { renderMarkdownBody, tokenizeMarkdown, type Inline, type Token } from "./markdown";

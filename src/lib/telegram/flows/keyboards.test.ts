@@ -17,9 +17,8 @@
  *
  * Validates: Requirements 2.3, 4.1, 4.2, 4.3, 5.3, 10.2
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { describe, expect, it } from "vitest";
-import fc from "fast-check";
-
 import type { InlineKeyboard } from "grammy";
 import {
     type CategoryItem,

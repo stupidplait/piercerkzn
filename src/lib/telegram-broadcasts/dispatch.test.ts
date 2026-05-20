@@ -18,9 +18,8 @@
  *
  * Validates: Requirements 2.7, 3.4, 6.2, 9.1, 9.2
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import fc from "fast-check";
-
 // ---------------------------------------------------------------------------
 // Hoisted mocks
 // ---------------------------------------------------------------------------

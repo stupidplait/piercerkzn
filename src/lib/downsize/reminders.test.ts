@@ -7,9 +7,8 @@
  *   - Property 19: Downsize unsubscribe preserves flag
  *   - Property 21 (downsize half): Studio-local fire instants
  */
+import { fc, fcAssert } from "@/test/property/fc-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import fc from "fast-check";
-
 // ---------------------------------------------------------------------------
 // Hoisted mocks
 // ---------------------------------------------------------------------------
