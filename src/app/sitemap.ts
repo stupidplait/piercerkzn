@@ -8,6 +8,8 @@ import { aftercareGuides } from "@/db/schema/content";
 
 const BASE_URL = "https://piercerkzn.ru";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [publishedProducts, publishedLooks, publishedPosts, publishedGuides] = await Promise.all([
         db
