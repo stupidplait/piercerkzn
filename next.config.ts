@@ -8,7 +8,7 @@ const baseCspDirectives = [
     "base-uri 'self'",
     "form-action 'self'",
     // Scripts: Next.js inline runtime + PostHog SDK + Telegram WebApp SDK
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://eu.posthog.com https://*.posthog.com https://telegram.org",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://eu.posthog.com https://*.posthog.com https://telegram.org",
     // Workers: blob: for R3F-spawned workers (Three.js loaders)
     "worker-src 'self' blob:",
     // Styles: inline allowed for Tailwind v4 generated CSS
@@ -18,8 +18,8 @@ const baseCspDirectives = [
     "media-src 'self' blob: https:",
     // Fonts: next/font serves them from /_next; allow data URIs for inlined ones
     "font-src 'self' data:",
-    // Network: same-origin + analytics + Telegram bot OAuth callback host
-    "connect-src 'self' https://eu.posthog.com https://*.posthog.com https://api.resend.com https://api.telegram.org",
+    // Network: same-origin + analytics + Telegram bot OAuth callback host + blob for GLTFLoader textures
+    "connect-src 'self' blob: https://eu.posthog.com https://*.posthog.com https://api.resend.com https://api.telegram.org",
     "object-src 'none'",
     "upgrade-insecure-requests",
 ];
