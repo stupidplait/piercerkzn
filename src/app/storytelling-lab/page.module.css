@@ -1,0 +1,346 @@
+/* ============================================================
+   Storytelling Lab — multi-toggle playground for Chapter 1 fill
+   ============================================================ */
+
+/* ── Top toolbar ── */
+
+.labToolbar {
+    position: fixed;
+    top: clamp(72px, 9vh, 96px);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    pointer-events: none;
+    padding: 12px clamp(16px, 3vw, 32px);
+}
+
+.labToolbarKicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 45, 138, 0.35);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.7);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.78);
+    pointer-events: auto;
+}
+
+.labToolbarTag {
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+    letter-spacing: 0.4em;
+}
+
+.labPresets {
+    display: inline-flex;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.labPresetBtn {
+    padding: 5px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.6);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: rgba(240, 240, 240, 0.7);
+    cursor: pointer;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition:
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.labPresetBtn:hover {
+    border-color: var(--accent, #ff2d8a);
+    color: #fff;
+}
+
+.labToggleGrid {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    background: rgba(8, 8, 8, 0.78);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    pointer-events: auto;
+    max-width: min(100%, 1080px);
+    justify-content: center;
+}
+
+.labToggleBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.55);
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
+    font-family: inherit;
+    position: relative;
+}
+
+.labToggleBtn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(240, 240, 240, 0.92);
+}
+
+.labToggleBtn[data-active="true"] {
+    background: rgba(255, 45, 138, 0.18);
+    color: #fff;
+}
+
+.labToggleIdx {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    opacity: 0.6;
+}
+
+.labToggleLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* iOS-style switch indicator */
+.labToggleSwitch {
+    width: 22px;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    position: relative;
+    transition: background 0.2s ease;
+}
+
+.labToggleSwitch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+}
+
+.labToggleBtn[data-active="true"] .labToggleSwitch {
+    background: var(--accent, #ff2d8a);
+    box-shadow: 0 0 10px rgba(255, 45, 138, 0.5);
+}
+
+.labToggleBtn[data-active="true"] .labToggleSwitch::after {
+    transform: translateX(10px);
+}
+
+/* ── Chapter card (mirrors canonical) ── */
+
+.labChapterCard {
+    position: absolute;
+    top: clamp(220px, 28vh, 280px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.55);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+}
+
+.labChapterCardKicker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+}
+
+.labChapterCardRule {
+    width: 22px;
+    height: 1px;
+    background: rgba(240, 240, 240, 0.4);
+}
+
+.labChapterCardTitle {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+}
+
+/* ── Rolodex (mirrors canonical) ── */
+
+.labRolodex {
+    --rolodex-strip-w: 280px;
+    --rolodex-row-h: 44px;
+    position: absolute;
+    right: clamp(20px, 3vw, 56px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 18px;
+    align-items: center;
+    padding: 14px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(8, 8, 8, 0.55);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    width: var(--rolodex-strip-w);
+    pointer-events: auto;
+}
+
+.labRolodexRail {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.labRolodexRailDot {
+    width: 4px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        height 0.3s ease;
+}
+
+.labRolodexRailDot:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.labRolodexRailDot[data-active="true"] {
+    background: var(--accent, #ff2d8a);
+    height: 24px;
+    box-shadow: 0 0 8px rgba(255, 45, 138, 0.6);
+}
+
+.labRolodexWindow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: calc(var(--rolodex-row-h) * 3 + 12px);
+    overflow: hidden;
+}
+
+.labRolodexHalo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    height: var(--rolodex-row-h);
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.42);
+    transition: color 0.2s ease;
+    text-align: right;
+    will-change: transform, opacity;
+}
+
+.labRolodexHalo:hover {
+    color: rgba(240, 240, 240, 0.92);
+}
+
+.labRolodexHaloNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--accent, #ff2d8a);
+    opacity: 0.6;
+}
+
+.labRolodexHaloName {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.labRolodexActive {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    height: var(--rolodex-row-h);
+    padding: 0 12px;
+    border-right: 2px solid var(--accent, #ff2d8a);
+    margin-left: auto;
+    text-align: right;
+    will-change: transform, opacity, filter;
+}
+
+.labRolodexActiveNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+}
+
+.labRolodexActiveName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(13px, 1.2vw, 17px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 880px) {
+    .labRolodex {
+        --rolodex-strip-w: 220px;
+        --rolodex-row-h: 38px;
+    }
+    .labRolodexActiveName {
+        font-size: 12px;
+    }
+}

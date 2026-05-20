@@ -1,0 +1,548 @@
+/* ============================================================
+   Storytelling layers — overlay components for Chapter 1 fill
+   Each layer is positional; layers are designed to combine.
+   ============================================================ */
+
+/* ============================================================
+   01 — Podium / pedestal (SVG two-tier)
+
+   Positioned at bottom-center; sized so the floating jewelry piece
+   in the 3D canvas appears to rest on the top tier.
+   ============================================================ */
+
+.podium {
+    position: absolute;
+    bottom: clamp(60px, 11vh, 110px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    width: clamp(280px, 32vw, 400px);
+    pointer-events: none;
+    /* Subtle accent glow behind the pedestal — pairs with warm 3D
+       lighting and grounds the SVG against the dark void. */
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
+}
+
+.podiumSvg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* ============================================================
+   02 — Grid floor
+   ============================================================ */
+
+.gridFloor {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.gridFloorPlane {
+    position: absolute;
+    bottom: 0;
+    left: -10%;
+    right: -10%;
+    height: 56vh;
+    perspective: 600px;
+    transform-style: preserve-3d;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform: rotateX(72deg) translateZ(-100px);
+    transform-origin: 50% 100%;
+    mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.5) 30%,
+        transparent 80%
+    );
+    -webkit-mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.5) 30%,
+        transparent 80%
+    );
+}
+
+.gridFloorHorizon {
+    position: absolute;
+    bottom: 50vh;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(255, 45, 138, 0.18) 30%,
+        rgba(255, 45, 138, 0.32) 50%,
+        rgba(255, 45, 138, 0.18) 70%,
+        transparent 100%
+    );
+}
+
+/* ============================================================
+   03 — Body-area indicator
+   ============================================================ */
+
+.bodyArea {
+    position: absolute;
+    top: clamp(120px, 16vh, 160px);
+    right: clamp(24px, 4vw, 56px);
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: rgba(8, 8, 8, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+    animation: bodyAreaIn 0.5s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+@keyframes bodyAreaIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bodyAreaIcon {
+    width: 32px;
+    height: 32px;
+    color: var(--accent, #ff2d8a);
+}
+
+.bodyAreaText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bodyAreaKicker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.42);
+}
+
+.bodyAreaLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.92);
+}
+
+/* ============================================================
+   04 — Material swatches
+   ============================================================ */
+
+.swatches {
+    position: absolute;
+    bottom: clamp(180px, 24vh, 220px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+.swatchesKicker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.42);
+}
+
+.swatchesRow {
+    display: inline-flex;
+    gap: 14px;
+}
+
+.swatch {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 4px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.5);
+    transition: color 0.2s ease;
+}
+
+.swatch:hover {
+    color: rgba(240, 240, 240, 0.85);
+}
+
+.swatch[data-active="true"] {
+    color: var(--ink, #f0f0f0);
+}
+
+.swatchDisc {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.swatch[data-active="true"] .swatchDisc {
+    border-color: var(--accent, #ff2d8a);
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(255, 45, 138, 0.45);
+}
+
+.swatchLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   05 — Hanging tag
+   ============================================================ */
+
+.tag {
+    position: absolute;
+    top: 38%;
+    left: calc(50% + clamp(110px, 14vw, 160px));
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    transform: rotate(4deg);
+    transform-origin: 50% 0;
+    animation: tagSway 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes tagSway {
+    from {
+        transform: rotate(3deg);
+    }
+    to {
+        transform: rotate(-2deg);
+    }
+}
+
+.tagString {
+    width: 1px;
+    height: 60px;
+    background: rgba(240, 240, 240, 0.25);
+}
+
+.tagPunch {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(8, 8, 8, 1);
+    border: 1px solid rgba(240, 240, 240, 0.4);
+    margin-top: -4px;
+}
+
+.tagBody {
+    width: 130px;
+    margin-top: 6px;
+    padding: 14px 12px;
+    background: linear-gradient(180deg, #f4ebd5 0%, #e8dec6 100%);
+    color: #2a1d10;
+    border-radius: 1px;
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+}
+
+.tagIndex {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    color: rgba(42, 29, 16, 0.55);
+    font-weight: 700;
+}
+
+.tagName {
+    font-family: var(--font-display-new), serif;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #2a1d10;
+    font-weight: 700;
+}
+
+.tagMeta {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: rgba(42, 29, 16, 0.65);
+    text-transform: uppercase;
+    border-top: 1px dashed rgba(42, 29, 16, 0.3);
+    padding-top: 4px;
+    margin-top: 2px;
+}
+
+@media (max-width: 720px) {
+    .tag {
+        left: calc(50% + 100px);
+        top: 42%;
+    }
+    .tagBody {
+        width: 110px;
+        padding: 10px 8px;
+    }
+}
+
+/* ============================================================
+   06 — Light rig
+   ============================================================ */
+
+.rig {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.rigBeam {
+    position: absolute;
+    width: 60vmin;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        rgba(255, 200, 160, 0) 0%,
+        rgba(255, 200, 160, 0.18) 30%,
+        rgba(255, 200, 160, 0.32) 60%,
+        rgba(255, 200, 160, 0) 100%
+    );
+    background-size: 8px 1px;
+    background-image: repeating-linear-gradient(
+        to right,
+        rgba(255, 200, 160, 0.32) 0,
+        rgba(255, 200, 160, 0.32) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+    transform-origin: 0 50%;
+    opacity: 0.42;
+}
+
+.rigAperture {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 200, 160, 0.55);
+    pointer-events: none;
+}
+
+/* ============================================================
+   07 — Patron quotes drifting
+   ============================================================ */
+
+.quotes {
+    position: absolute;
+    left: clamp(32px, 6vw, 80px);
+    bottom: clamp(280px, 36vh, 360px);
+    z-index: 2;
+    max-width: 280px;
+    pointer-events: none;
+}
+
+.quotesText {
+    margin: 0;
+    font-family: var(--font-display-new), serif;
+    font-style: italic;
+    font-size: clamp(13px, 1.2vw, 16px);
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+    color: rgba(240, 240, 240, 0.32);
+    animation: quotesFade 7s ease-in-out infinite;
+}
+
+.quotesWho {
+    display: inline-block;
+    margin-top: 4px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-style: normal;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    color: rgba(255, 45, 138, 0.5);
+    text-transform: uppercase;
+}
+
+@keyframes quotesFade {
+    0%,
+    100% {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    20%,
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   08 — Provenance card
+   ============================================================ */
+
+.provenance {
+    position: absolute;
+    left: clamp(24px, 4vw, 56px);
+    bottom: clamp(36px, 6vh, 64px);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(8, 8, 8, 0.62);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+    width: 200px;
+    animation: provenanceIn 0.5s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+@keyframes provenanceIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.provenanceRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+}
+
+.provenanceKey {
+    color: rgba(240, 240, 240, 0.4);
+}
+
+.provenanceVal {
+    color: rgba(240, 240, 240, 0.92);
+}
+
+.provenanceStamp {
+    margin-top: 4px;
+    padding: 4px 8px;
+    border: 1px dashed rgba(255, 45, 138, 0.55);
+    border-radius: 2px;
+    align-self: flex-start;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 8px;
+    letter-spacing: 0.42em;
+    color: var(--accent, #ff2d8a);
+    transform: rotate(-3deg);
+}
+
+/* ============================================================
+   09 — Blueprint sketches
+   ============================================================ */
+
+.blueprint {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.85;
+    mix-blend-mode: screen;
+}
+
+.blueprint svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================================
+   10 — Studio map
+   ============================================================ */
+
+.studio {
+    position: absolute;
+    top: clamp(120px, 16vh, 160px);
+    left: clamp(24px, 4vw, 56px);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(8, 8, 8, 0.62);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+    width: 160px;
+}
+
+.studioKicker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent, #ff2d8a);
+    font-weight: 600;
+}
+
+.studioPlan {
+    width: 100%;
+    height: auto;
+}
+
+.studioLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 8px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.5);
+    text-align: center;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .tag,
+    .quotesText,
+    .bodyArea,
+    .provenance {
+        animation: none !important;
+    }
+}

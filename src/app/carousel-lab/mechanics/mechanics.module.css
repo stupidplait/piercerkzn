@@ -1,0 +1,1090 @@
+/* ============================================================
+   Carousel Lab — mechanic component styles
+   8 picker mechanics for Chapter 1, sharing one 3D scene.
+
+   Layout convention: each mechanic is positioned within the
+   .labMechanicLayer (absolute, inset:0). Most pickers anchor
+   to the bottom or sides so the 3D piece in the centre stays
+   visible. The shared spec block sits at bottom-center.
+   ============================================================ */
+
+/* ── Shared utility ── */
+
+.hintMark {
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+    margin-right: 2px;
+}
+
+/* ============================================================
+   01 — Полоска / Tab Strip
+   Horizontal nav row, top of viewport.
+   ============================================================ */
+
+.tabStripRoot {
+    position: absolute;
+    top: clamp(180px, 22vh, 220px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(96vw, 1100px);
+    display: flex;
+    justify-content: center;
+}
+
+.tabStrip {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    background: linear-gradient(to bottom, rgba(8, 8, 8, 0.5), rgba(8, 8, 8, 0));
+    padding: 12px 8px 14px;
+}
+
+.tabStripBtn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 4px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.45);
+    transition: color 0.2s ease;
+}
+
+.tabStripBtn:hover {
+    color: rgba(240, 240, 240, 0.85);
+}
+
+.tabStripBtn[data-active="true"] {
+    color: #fff;
+}
+
+.tabStripBtnNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent, #ff2d8a);
+    opacity: 0.6;
+}
+
+.tabStripBtn[data-active="true"] .tabStripBtnNum {
+    opacity: 1;
+}
+
+.tabStripBtnName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 600;
+    font-size: clamp(11px, 1vw, 13px);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tabStripIndicator {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: var(--accent, #ff2d8a);
+    box-shadow: 0 0 14px rgba(255, 45, 138, 0.7);
+    transition: transform 0.5s cubic-bezier(0.22, 0.9, 0.32, 1);
+}
+
+@media (max-width: 720px) {
+    .tabStripBtnName {
+        font-size: 10px;
+    }
+}
+
+/* ============================================================
+   02 — Плитки / Pressure Plates
+   Horizontal arc of 6 floor markers near bottom.
+   ============================================================ */
+
+.platesRoot {
+    position: absolute;
+    bottom: clamp(28px, 5vh, 48px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(96vw, 880px);
+    display: flex;
+    justify-content: center;
+    perspective: 800px;
+}
+
+.platesArc {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    width: 100%;
+    transform: rotateX(28deg);
+    transform-origin: center bottom;
+}
+
+.plate {
+    position: relative;
+    aspect-ratio: 1.4 / 1;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 0%, rgba(8, 8, 8, 0.65) 100%);
+    cursor: pointer;
+    transform: translateY(var(--arc-y, 0));
+    transition:
+        transform 0.4s cubic-bezier(0.22, 0.9, 0.32, 1),
+        border-color 0.3s ease,
+        background 0.3s ease;
+    padding: 0;
+    overflow: hidden;
+}
+
+.plate:hover {
+    border-color: rgba(255, 45, 138, 0.5);
+    background: linear-gradient(to bottom, rgba(255, 45, 138, 0.06) 0%, rgba(8, 8, 8, 0.7) 100%);
+}
+
+.plate[data-active="true"] {
+    border-color: var(--accent, #ff2d8a);
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 45, 138, 0.18) 0%,
+        rgba(255, 45, 138, 0.04) 60%,
+        rgba(8, 8, 8, 0.65) 100%
+    );
+    transform: translateY(calc(var(--arc-y, 0) - 8px));
+    box-shadow:
+        0 -10px 24px rgba(255, 45, 138, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.plateInner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 100%;
+    height: 100%;
+    padding: 8px 6px;
+}
+
+.plateNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--accent, #ff2d8a);
+    font-weight: 600;
+}
+
+.plateName {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.85);
+    text-align: center;
+    line-height: 1.15;
+}
+
+.platePulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.plate[data-active="true"] .platePulse {
+    opacity: 1;
+    animation: platePulse 2.4s ease-out infinite;
+    background: radial-gradient(ellipse at top, rgba(255, 45, 138, 0.32) 0%, transparent 70%);
+}
+
+@keyframes platePulse {
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 720px) {
+    .platesArc {
+        transform: rotateX(20deg);
+        gap: 5px;
+    }
+    .plateName {
+        font-size: 8px;
+    }
+}
+
+/* ============================================================
+   03 — Карусель / Turntable
+   CSS-3D wheel with 6 pills around a circle.
+   ============================================================ */
+
+.turntableRoot {
+    position: absolute;
+    bottom: clamp(40px, 6vh, 60px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 460px;
+    height: 240px;
+    pointer-events: none;
+}
+
+.turntableWheel {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transition: transform 0.7s cubic-bezier(0.22, 0.9, 0.32, 1);
+    pointer-events: none;
+}
+
+.turntablePill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 130px;
+    padding: 8px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+    pointer-events: auto;
+    transition:
+        border-color 0.3s ease,
+        background 0.3s ease,
+        transform 0.7s cubic-bezier(0.22, 0.9, 0.32, 1);
+    white-space: nowrap;
+    transform-origin: 50% 50%;
+}
+
+.turntablePill:hover {
+    border-color: rgba(255, 45, 138, 0.5);
+}
+
+.turntablePill[data-active="true"] {
+    border-color: var(--accent, #ff2d8a);
+    background: rgba(255, 45, 138, 0.18);
+    box-shadow: 0 6px 22px rgba(255, 45, 138, 0.35);
+}
+
+.turntablePillNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--accent, #ff2d8a);
+    font-weight: 600;
+}
+
+.turntablePillName {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.92);
+}
+
+.turntablePivot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent, #ff2d8a);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 18px rgba(255, 45, 138, 0.6);
+}
+
+/* Pointer marker at the top showing where the active pill lands */
+.turntableMarker {
+    position: absolute;
+    top: -190px;
+    left: 0;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--accent, #ff2d8a);
+    filter: drop-shadow(0 0 8px rgba(255, 45, 138, 0.7));
+}
+
+.turntableHint {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.5);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   04 — Картотека / Vertical Rolodex
+   Right-edge strip with rail (left) + sliding window (right).
+   ============================================================ */
+
+.rolodexRoot {
+    position: absolute;
+    right: clamp(20px, 3vw, 56px);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    --rolodex-strip-w: 280px;
+    --rolodex-row-h: 44px; /* uniform row height — keeps all names visually balanced */
+}
+
+.rolodexStrip {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 18px;
+    align-items: center;
+    padding: 14px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(8, 8, 8, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    pointer-events: auto;
+    width: var(--rolodex-strip-w);
+}
+
+/* Rail: vertical strip of clickable dots on the LEFT — jumps directly
+   to any piece via goToIndex. */
+.rolodexRail {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rolodexRailDot {
+    width: 4px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        height 0.3s ease;
+}
+
+.rolodexRailDot:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.rolodexRailDot[data-active="true"] {
+    background: var(--accent, #ff2d8a);
+    height: 24px;
+    box-shadow: 0 0 8px rgba(255, 45, 138, 0.6);
+}
+
+/* Sliding window: AnimatePresence renders prev/active/next here.
+   Fixed total height = 3 rows so the bar doesn't jump as content
+   transitions in and out. Overflow is hidden so during a swap the
+   exiting/entering items are clipped at the window edges, selling
+   the "scrolling" feel. */
+.rolodexWindow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: calc(var(--rolodex-row-h) * 3 + 12px);
+    overflow: hidden;
+}
+
+.rolodexHalo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0;
+    height: var(--rolodex-row-h);
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.42);
+    transition: color 0.2s ease;
+    text-align: right;
+    will-change: transform, opacity;
+}
+
+.rolodexHalo:hover {
+    color: rgba(240, 240, 240, 0.92);
+}
+
+.rolodexHaloNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--accent, #ff2d8a);
+    opacity: 0.6;
+}
+
+.rolodexHaloName {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.rolodexActive {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    height: var(--rolodex-row-h);
+    padding: 0 12px;
+    border-right: 2px solid var(--accent, #ff2d8a);
+    margin-left: auto;
+    text-align: right;
+    will-change: transform, opacity, filter;
+    position: relative;
+}
+
+.rolodexActiveNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+}
+
+.rolodexActiveName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    /* Smaller clamp than before so the longest name (КРЕСТ-СЕРЬГА) fits
+       on a single line at the same visual size as shorter names. */
+    font-size: clamp(13px, 1.2vw, 17px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.rolodexActiveDot {
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent, #ff2d8a);
+    box-shadow: 0 0 10px rgba(255, 45, 138, 0.7);
+}
+
+.rolodexHint {
+    grid-column: 1 / -1;
+    margin: 8px 0 0;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.42);
+    text-align: right;
+}
+
+@media (max-width: 720px) {
+    .rolodexRoot {
+        --rolodex-strip-w: 220px;
+        --rolodex-row-h: 38px;
+    }
+    .rolodexActiveName {
+        font-size: 12px;
+    }
+}
+
+/* ============================================================
+   05 — Силуэты / Coverflow Silhouettes
+   Faded prev/next text-silhouettes on either side.
+   ============================================================ */
+
+.coverflowRoot {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.coverflowGhost {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+    color: rgba(240, 240, 240, 0.18);
+    transition:
+        color 0.3s ease,
+        transform 0.3s ease,
+        opacity 0.3s ease;
+    opacity: 0.7;
+    text-align: left;
+}
+
+.coverflowGhost:hover {
+    color: rgba(240, 240, 240, 0.7);
+    opacity: 1;
+}
+
+.coverflowGhost[data-pos="prev"] {
+    left: clamp(20px, 4vw, 56px);
+}
+
+.coverflowGhost[data-pos="next"] {
+    right: clamp(20px, 4vw, 56px);
+}
+
+.coverflowGhostNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--accent, #ff2d8a);
+    opacity: 0.85;
+}
+
+.coverflowGhostName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 56px);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    line-height: 1;
+    -webkit-text-stroke: 1px currentColor;
+    color: transparent;
+    transition:
+        color 0.3s ease,
+        -webkit-text-stroke 0.3s ease;
+}
+
+.coverflowGhost:hover .coverflowGhostName {
+    color: rgba(240, 240, 240, 0.4);
+}
+
+.coverflowGhostArrow {
+    font-size: 28px;
+    color: var(--accent, #ff2d8a);
+    opacity: 0.6;
+    line-height: 1;
+}
+
+.coverflowHint {
+    position: absolute;
+    bottom: clamp(36px, 5vh, 48px);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.45);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    .coverflowGhostName {
+        font-size: 22px;
+    }
+    .coverflowGhost {
+        padding: 12px 12px;
+        gap: 8px;
+    }
+}
+
+/* ============================================================
+   06 — Сетка / Magnifier Grid
+   3×2 grid of tiles, click to magnify.
+   ============================================================ */
+
+.gridRoot {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.gridSheet {
+    position: relative;
+    width: min(86vw, 760px);
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    background: rgba(8, 8, 8, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: auto;
+    animation: gridIn 0.5s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+@keyframes gridIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.gridGutter {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 720px) {
+    .gridGutter {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.gridTile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 18px 18px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 0%, rgba(8, 8, 8, 0.5) 100%);
+    cursor: pointer;
+    transition:
+        transform 0.3s ease,
+        border-color 0.3s ease,
+        background 0.3s ease;
+    text-align: left;
+    color: var(--ink, #f0f0f0);
+}
+
+.gridTile:hover {
+    border-color: rgba(255, 45, 138, 0.45);
+    transform: translateY(-3px);
+    background: linear-gradient(to bottom, rgba(255, 45, 138, 0.08) 0%, rgba(8, 8, 8, 0.55) 100%);
+}
+
+.gridTile[data-active="true"] {
+    border-color: var(--accent, #ff2d8a);
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 45, 138, 0.18) 0%,
+        rgba(255, 45, 138, 0.04) 60%,
+        rgba(8, 8, 8, 0.5) 100%
+    );
+    box-shadow: 0 8px 28px rgba(255, 45, 138, 0.28);
+}
+
+.gridGlyph {
+    font-size: 22px;
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.gridTileNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: rgba(240, 240, 240, 0.5);
+}
+
+.gridTileName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 700;
+    font-size: clamp(13px, 1.2vw, 16px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.95);
+}
+
+.gridTilePrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent, #ff2d8a);
+    margin-top: 4px;
+}
+
+.gridReopen {
+    position: absolute;
+    top: clamp(180px, 22vh, 220px);
+    right: clamp(24px, 4vw, 56px);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.85);
+    pointer-events: auto;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition:
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.gridReopen:hover {
+    border-color: var(--accent, #ff2d8a);
+    color: #fff;
+}
+
+.gridReopenIcon {
+    font-size: 16px;
+    color: var(--accent, #ff2d8a);
+}
+
+/* ============================================================
+   07 — Фильтр / Material Filter Chips
+   Top filter bar + horizontal piece scroller.
+   ============================================================ */
+
+.filterRoot {
+    position: absolute;
+    top: clamp(180px, 22vh, 220px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: min(96vw, 920px);
+}
+
+.filterChips {
+    display: inline-flex;
+    gap: 6px;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.filterChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.55);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.filterChip:hover {
+    color: rgba(240, 240, 240, 0.92);
+}
+
+.filterChip[data-active="true"] {
+    background: var(--accent, #ff2d8a);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(255, 45, 138, 0.3);
+}
+
+.filterChipCount {
+    font-size: 10px;
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+.filterRow {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: rgba(8, 8, 8, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.filterCard {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        opacity 0.25s ease;
+}
+
+.filterCard:hover {
+    border-color: rgba(255, 45, 138, 0.4);
+    background: rgba(255, 45, 138, 0.04);
+}
+
+.filterCard[data-active="true"] {
+    border-color: var(--accent, #ff2d8a);
+    background: rgba(255, 45, 138, 0.12);
+}
+
+.filterCard[data-dim="true"] {
+    opacity: 0.32;
+}
+
+.filterCardNum {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent, #ff2d8a);
+}
+
+.filterCardName {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.92);
+    line-height: 1.15;
+}
+
+.filterCardMaterial {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.45);
+    margin-top: 2px;
+}
+
+@media (max-width: 720px) {
+    .filterRow {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ============================================================
+   08 — Удержание / Hold-to-Rotate
+   Crosshair feedback + step arrows.
+   ============================================================ */
+
+.holdRoot {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.holdCrosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 220px;
+    height: 220px;
+    pointer-events: none;
+    transition:
+        opacity 0.4s ease,
+        transform 0.15s ease-out;
+    opacity: 0.18;
+}
+
+.holdCrosshair[data-holding="true"] {
+    opacity: 0.7;
+    transition:
+        opacity 0.2s ease,
+        transform 0.05s linear;
+}
+
+.holdCrosshairRing {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 45, 138, 0.7);
+}
+
+.holdCrosshairTickH,
+.holdCrosshairTickV {
+    position: absolute;
+    background: rgba(255, 45, 138, 0.5);
+}
+
+.holdCrosshairTickH {
+    top: 50%;
+    left: -8px;
+    right: -8px;
+    height: 1px;
+    transform: translateY(-50%);
+}
+
+.holdCrosshairTickV {
+    left: 50%;
+    top: -8px;
+    bottom: -8px;
+    width: 1px;
+    transform: translateX(-50%);
+}
+
+.holdArc {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    border-top: 2px solid rgba(255, 45, 138, 0.9);
+    border-right: 2px solid rgba(255, 45, 138, 0.4);
+    border-bottom: 2px solid transparent;
+    border-left: 2px solid transparent;
+    pointer-events: none;
+    transition: transform 0.05s linear;
+}
+
+.holdSteps {
+    position: absolute;
+    bottom: clamp(36px, 5vh, 56px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    pointer-events: auto;
+}
+
+.holdStepBtn {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    background: rgba(8, 8, 8, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.92);
+    font-size: 18px;
+    line-height: 1;
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        background 0.2s ease;
+    font-family: inherit;
+}
+
+.holdStepBtn:hover {
+    border-color: var(--accent, #ff2d8a);
+    color: #fff;
+    background: rgba(255, 45, 138, 0.12);
+    transform: scale(1.06);
+}
+
+.holdStepIndex {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.7);
+    min-width: 80px;
+    text-align: center;
+}
+
+.holdHint {
+    position: absolute;
+    bottom: clamp(96px, 12vh, 120px);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.42);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    .holdHint {
+        white-space: normal;
+        max-width: 80vw;
+        text-align: center;
+    }
+}
+
+/* ============================================================
+   Reduced motion — kill the dramatic stuff
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .tabStripIndicator,
+    .turntableWheel,
+    .turntablePill,
+    .rolodexActive,
+    .gridSheet,
+    .holdCrosshair,
+    .holdArc {
+        animation: none !important;
+        transition: none !important;
+    }
+    .platePulse {
+        animation: none !important;
+    }
+}

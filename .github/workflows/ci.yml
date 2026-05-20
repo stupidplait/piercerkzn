@@ -1,0 +1,271 @@
+name: ci
+
+on:
+    pull_request:
+        branches: [main, staging]
+    push:
+        branches: [main, staging]
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    NODE_VERSION: "20"
+    PNPM_VERSION: "9"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm lint
+            - run: pnpm format:check
+            - name: Audit scripts
+              env:
+                  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+              run: |
+                  pnpm check:env-audit
+                  pnpm check:cron-routes
+                  pnpm check:env-schema
+
+    typecheck:
+        needs: [lint]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm typecheck
+
+    test-unit:
+        needs: [typecheck]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm test:unit:coverage
+            - uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: coverage
+                  path: coverage
+                  retention-days: 14
+
+    test-integration:
+        needs: [test-unit]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - name: Create Neon ephemeral branch
+              id: neon
+              uses: neondatabase/create-branch-action@v5
+              with:
+                  project_id: ${{ secrets.NEON_PROJECT_ID }}
+                  parent: ${{ secrets.NEON_PARENT_BRANCH_ID }}
+                  branch_name: ci-int-${{ github.run_id }}-${{ github.run_attempt }}
+                  api_key: ${{ secrets.NEON_API_KEY }}
+            - run: pnpm install --frozen-lockfile
+            - name: Run integration tests
+              env:
+                  DATABASE_URL: ${{ steps.neon.outputs.db_url_pooled }}
+                  UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+                  UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+                  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+              run: pnpm test:integration
+            - name: Tear down Neon branch
+              if: always()
+              uses: neondatabase/delete-branch-action@v3
+              with:
+                  project_id: ${{ secrets.NEON_PROJECT_ID }}
+                  branch: ci-int-${{ github.run_id }}-${{ github.run_attempt }}
+                  api_key: ${{ secrets.NEON_API_KEY }}
+
+    migration-dry-run:
+        needs: [test-unit]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - name: Create Neon ephemeral branch
+              id: neon
+              uses: neondatabase/create-branch-action@v5
+              with:
+                  project_id: ${{ secrets.NEON_PROJECT_ID }}
+                  parent: ${{ secrets.NEON_PARENT_BRANCH_ID }}
+                  branch_name: ci-mig-${{ github.run_id }}-${{ github.run_attempt }}
+                  api_key: ${{ secrets.NEON_API_KEY }}
+            - run: pnpm install --frozen-lockfile
+            - name: Check migration drift
+              run: |
+                  pnpm db:generate
+                  if [ -n "$(git status --porcelain src/db/migrations)" ]; then
+                    echo "::error::uncommitted migration drift detected"
+                    git diff src/db/migrations
+                    exit 1
+                  fi
+            - name: Apply migrations
+              env:
+                  DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+              run: pnpm db:migrate
+            - name: Tear down Neon branch
+              if: always()
+              uses: neondatabase/delete-branch-action@v3
+              with:
+                  project_id: ${{ secrets.NEON_PROJECT_ID }}
+                  branch: ci-mig-${{ github.run_id }}-${{ github.run_attempt }}
+                  api_key: ${{ secrets.NEON_API_KEY }}
+
+    build:
+        needs: [test-integration, migration-dry-run]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm build
+              env:
+                  NEXT_PUBLIC_SITE_URL: https://piercerkzn.ru
+                  NEXT_PUBLIC_POSTHOG_HOST: https://eu.posthog.com
+
+    test-e2e:
+        needs: [build]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - run: pnpm install --frozen-lockfile
+            - run: npx playwright install --with-deps
+            - run: pnpm test:e2e
+            - uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: playwright-report
+                  path: playwright-report
+                  retention-days: 14
+
+    security-audit:
+        needs: [build]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: ${{ env.PNPM_VERSION }}
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm audit --prod --audit-level=high
+            - name: Snyk test
+              if: vars.SNYK_ENABLED == 'true'
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+              run: npx snyk@latest test --severity-threshold=high
+
+    deploy-prod:
+        needs: [test-e2e, security-audit]
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - run: npm i -g vercel@latest
+            - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+              env:
+                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+            - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+              env:
+                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+            - run: vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+              env:
+                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    deploy-staging:
+        needs: [test-e2e, security-audit]
+        if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - run: npm i -g vercel@latest
+            - run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+              env:
+                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+            - run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+              env:
+                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+            - run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+              env:
+                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

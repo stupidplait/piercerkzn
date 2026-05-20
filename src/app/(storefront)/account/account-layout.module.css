@@ -1,0 +1,117 @@
+/* ============================================================
+   Account Layout — Auth-gated section with sidebar navigation
+   Steel Atelier design tokens
+   ============================================================ */
+
+.accountShell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: clamp(24px, 3vw, 48px);
+    min-height: 60vh;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    position: sticky;
+    top: clamp(80px, 10vh, 120px);
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: clamp(16px, 2vw, 24px);
+    background: rgba(8, 8, 8, 0.6);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+}
+
+.sidebarTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(16px, 1.4vw, 20px);
+    font-weight: 700;
+    color: var(--ink, #f0f0f0);
+    margin: 0 0 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule, rgba(240, 240, 240, 0.16));
+}
+
+.navList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.navLink {
+    display: block;
+    padding: 10px 12px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    text-decoration: none;
+    border-radius: 2px;
+    transition:
+        color 250ms ease,
+        background-color 250ms ease;
+}
+
+.navLink:hover {
+    color: var(--ink, #f0f0f0);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.navLink[data-active="1"] {
+    color: var(--accent, #f06ba0);
+    font-weight: 500;
+    background: rgba(240, 107, 160, 0.08);
+}
+
+/* ── Content area ── */
+.content {
+    min-width: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .accountShell {
+        grid-template-columns: 1fr;
+        gap: clamp(16px, 3vw, 24px);
+    }
+
+    .sidebar {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 12px;
+    }
+
+    .sidebarTitle {
+        width: 100%;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+    }
+
+    .navList {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .navLink {
+        padding: 8px 12px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .navLink {
+        transition: none;
+    }
+}

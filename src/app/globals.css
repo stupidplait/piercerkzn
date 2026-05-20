@@ -1,1 +1,140 @@
-@import "tailwindcss";
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    /* Cyanotype Atelier — Light (drafting paper) */
+    --bg: #f2ecdd;
+    --bg-elev: #eae2cf;
+    --grid-minor: rgba(30, 41, 59, 0.08);
+    --grid-major: rgba(30, 41, 59, 0.22);
+    --ink: #1a2233;
+    --ink-muted: rgba(26, 34, 51, 0.55);
+    --accent: #b45309;
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0a1628;
+        --bg-elev: #0f1f38;
+        --grid-minor: rgba(125, 211, 252, 0.08);
+        --grid-major: rgba(125, 211, 252, 0.22);
+        --ink: #e8f1fa;
+        --ink-muted: rgba(232, 241, 250, 0.55);
+        --accent: #f5a524;
+        color-scheme: dark;
+    }
+}
+
+[data-theme="light"] {
+    --bg: #f2ecdd;
+    --bg-elev: #eae2cf;
+    --grid-minor: rgba(30, 41, 59, 0.08);
+    --grid-major: rgba(30, 41, 59, 0.22);
+    --ink: #1a2233;
+    --ink-muted: rgba(26, 34, 51, 0.55);
+    --accent: #b45309;
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    --bg: #0a1628;
+    --bg-elev: #0f1f38;
+    --grid-minor: rgba(125, 211, 252, 0.08);
+    --grid-major: rgba(125, 211, 252, 0.22);
+    --ink: #e8f1fa;
+    --ink-muted: rgba(232, 241, 250, 0.55);
+    --accent: #f5a524;
+    color-scheme: dark;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family:
+        var(--font-sans),
+        system-ui,
+        -apple-system,
+        Segoe UI,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition:
+        background-color 240ms ease,
+        color 240ms ease;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+    color: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Preloader scroll lock — moved out of `app/new-design/page.module.css`
+   because CSS Modules can't host top-level non-pure selectors. The
+   preloader component sets `html.preloader-active` for the duration
+   of the intro animation; this hides the scrollbar globally while
+   that class is present. */
+html.preloader-active {
+    overflow: hidden !important;
+}
+
+/* Admin component tokens — moved out of `app/admin/admin.module.css`
+   for the same CSS Module purity reason as the preloader rule above.
+   Consumed via `var(--adm-*)` from any admin page or component. */
+:root {
+    --adm-rule: rgba(232, 241, 250, 0.1);
+    --adm-magenta: #f06ba0;
+    --adm-magenta-tint: rgba(240, 107, 160, 0.1);
+    --adm-success: #4ade80;
+    --adm-warning: #fbbf24;
+    --adm-danger: #f87171;
+    --adm-info: #60a5fa;
+}
+
+/* Admin token overrides for the light theme — moved out of
+   `app/admin/admin.module.css` for CSS Module purity. The
+   `[data-theme="light"]` attribute is set on `<html>` by the theme
+   provider; this block re-binds the admin tokens defined above with
+   light-mode values. */
+[data-theme="light"] {
+    --adm-rule: rgba(26, 34, 51, 0.12);
+    --adm-magenta: #c54478;
+    --adm-magenta-tint: rgba(197, 68, 120, 0.1);
+}

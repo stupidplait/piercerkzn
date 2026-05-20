@@ -1,0 +1,9 @@
+.next/
+node_modules/
+dist/
+out/
+build/
+pnpm-lock.yaml
+*.tsbuildinfo
+public/
+src/db/migrations/

@@ -1,0 +1,3825 @@
+/* ==========================================================
+   Steel Atelier — scoped tokens for /new-design
+   Dark is the signature; light flips to bone paper.
+   ========================================================== */
+
+.hero {
+    /* defaults = dark (signature) */
+    --bg: #080808;
+    --bg-elev: #111111;
+    --ink: #f0f0f0;
+    --ink-muted: rgba(240, 240, 240, 0.5);
+    --grid-minor: rgba(255, 255, 255, 0.06);
+    --grid-major: rgba(255, 255, 255, 0.22);
+    --accent: #f06ba0;
+    --rule: rgba(240, 240, 240, 0.16);
+
+    position: relative;
+    min-height: 100svh;
+    width: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    isolation: isolate;
+    transition:
+        background-color 320ms ease,
+        color 320ms ease;
+}
+
+:global([data-theme="light"]) .hero {
+    --bg: #f5f5f5;
+    --bg-elev: #ebebeb;
+    --ink: #111111;
+    --ink-muted: rgba(0, 0, 0, 0.5);
+    --grid-minor: rgba(0, 0, 0, 0.07);
+    --grid-major: rgba(0, 0, 0, 0.22);
+    --accent: #c54478;
+    --rule: rgba(0, 0, 0, 0.18);
+}
+
+:global([data-theme="dark"]) .hero {
+    --bg: #080808;
+    --bg-elev: #111111;
+    --ink: #f0f0f0;
+    --ink-muted: rgba(240, 240, 240, 0.5);
+    --grid-minor: rgba(255, 255, 255, 0.06);
+    --grid-major: rgba(255, 255, 255, 0.22);
+    --accent: #f06ba0;
+    --rule: rgba(240, 240, 240, 0.16);
+}
+
+/* ==========================================================
+   Wireframe Room — Three.js canvas lives inside .stage
+   ========================================================== */
+
+.stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 1;
+    opacity: 0;
+    /* Entrance reveal — ease-out per `easing-entrance-ease-out` rule */
+    transition: opacity 0.15s ease-out;
+}
+
+.stage[data-revealed="1"] {
+    opacity: 1;
+}
+
+/* Soft vignette for focus on the wordmark */
+.vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at 50% 50%,
+        transparent 30%,
+        rgba(0, 0, 0, 0.45) 85%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    mix-blend-mode: multiply;
+}
+
+:global([data-theme="light"]) .vignette {
+    background: radial-gradient(
+        ellipse at 50% 50%,
+        transparent 35%,
+        rgba(0, 0, 0, 0.1) 85%,
+        rgba(0, 0, 0, 0.18) 100%
+    );
+    mix-blend-mode: normal;
+}
+
+/* ==========================================================
+   Preloader — blueprint construction + bloom transition
+
+   The preloader shows a geometric "architect's drawing" of the
+   torus ring: three concentric profile circles, cross-section
+   indicators, radial guides, and perspective corridor lines.
+   When the 3D scene is ready the wireframe brightens, a radial
+   bloom glow expands from center, and the overlay fades — making
+   the 3D torus feel like it was *born from* the blueprint.
+   ========================================================== */
+
+/* Hide scrollbar while preloader is on screen.
+   The `html.preloader-active { overflow: hidden }` rule is global —
+   CSS Modules can't host it directly (every selector must contain at
+   least one local class or id), so it lives in `app/globals.css`
+   alongside the other top-level page rules. */
+
+.preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    /* Dark is default — like an architectural blueprint. */
+    background: #0a0a0a;
+    pointer-events: auto;
+    opacity: 1;
+    --reveal-radius: 0px;
+}
+
+/* Light-theme preloader — architectural paper feel */
+:global([data-theme="light"]) .preloader {
+    background: #f0ede8;
+}
+
+.preloader[data-hidden="1"] {
+    pointer-events: none;
+    /* Simple fast fade — the actual reveal effect (refractive shockwave,
+       chromatic aberration, lens distortion) is now handled entirely
+       by the WebGL post-processing shader in FluidTrailEffect. */
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+/* --- Blueprint SVG container --- */
+.blueprintWrap {
+    width: min(85vw, 720px);
+    max-height: 50vh;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:global([data-theme="light"]) .blueprintWrap {
+    color: rgba(0, 0, 0, 0.75);
+}
+
+.blueprint {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    transition:
+        filter 0.6s ease,
+        color 0.6s ease;
+}
+
+/* On dismiss: lines flare bright white + gaussian blur */
+.preloader[data-hidden="1"] .blueprint {
+    color: #ffffff;
+    filter: brightness(3) blur(4px);
+}
+
+:global([data-theme="light"]) .preloader[data-hidden="1"] .blueprint {
+    color: #000000;
+    filter: brightness(0.3) blur(4px);
+}
+
+/* --- Blueprint layers (staggered fade-in via data-visible) --- */
+.bpLayer {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.22, 0.9, 0.32, 1);
+}
+
+/* Default visible state (torus layer) */
+.bpLayer[data-visible="1"] {
+    opacity: 0.85;
+}
+
+/* Grid layer — subtle perspective hint */
+.bpLayer[data-layer="grid"][data-visible="1"] {
+    opacity: 0.25;
+}
+
+/* Axes layer — construction reference */
+.bpLayer[data-layer="axes"][data-visible="1"] {
+    opacity: 0.4;
+}
+
+/* --- Torus circle draw-in animation --- */
+.bpDrawIn {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+}
+
+.bpLayer[data-visible="1"] .bpDrawIn {
+    animation: drawCircle 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes drawCircle {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Snap circles to filled when dismissing */
+.preloader[data-hidden="1"] .bpDrawIn {
+    stroke-dashoffset: 0;
+}
+
+/* --- Brand mark below blueprint (stagger fade-in) --- */
+.preloaderBrand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    -webkit-user-select: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+:global([data-theme="light"]) .preloaderBrand {
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.preloaderBrand[data-visible="1"] {
+    opacity: 0.5;
+}
+
+.preloaderDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+/* --- Tagline (stagger fade-in) --- */
+.preloaderTagline {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+    -webkit-user-select: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+:global([data-theme="light"]) .preloaderTagline {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.preloaderTagline[data-visible="1"] {
+    opacity: 0.35;
+}
+
+/* --- Bloom glow overlay (fires on dismiss) --- */
+.bloom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(200, 220, 255, 0.35) 30%,
+        rgba(180, 200, 255, 0.1) 55%,
+        transparent 75%
+    );
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* Light bloom — warm, dark-ink based glow */
+:global([data-theme="light"]) .bloom {
+    background: radial-gradient(
+        circle,
+        rgba(0, 0, 0, 0.4) 0%,
+        rgba(60, 40, 0, 0.18) 30%,
+        rgba(60, 40, 0, 0.05) 55%,
+        transparent 75%
+    );
+}
+
+.preloader[data-hidden="1"] .bloom {
+    animation: bloomPulse 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes bloomPulse {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.1);
+    }
+    15% {
+        opacity: 0.9;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(6);
+    }
+}
+
+/* --- Chromatic Aberration Rings ---
+   Two expanding rings that create RGB color splitting at the
+   wave edge. JS drives their transform/opacity via refs.
+   The offset between red (smaller/trailing) and blue (larger/leading)
+   creates the classic chromatic aberration found in glass lenses. */
+.chrRing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform, opacity;
+    transform: translate(-50%, -50%) scale(0);
+    mix-blend-mode: screen;
+}
+
+/* Red channel — trails the wave (slightly smaller radius) */
+.chrRed {
+    border: 2px solid rgba(255, 60, 40, 0.5);
+    box-shadow:
+        0 0 60px 12px rgba(255, 60, 40, 0.25),
+        0 0 120px 30px rgba(255, 60, 40, 0.08),
+        inset 0 0 40px 8px rgba(255, 60, 40, 0.12);
+}
+
+/* Blue channel — leads the wave (slightly larger radius) */
+.chrBlue {
+    border: 2px solid rgba(60, 100, 255, 0.5);
+    box-shadow:
+        0 0 60px 12px rgba(60, 100, 255, 0.25),
+        0 0 120px 30px rgba(60, 100, 255, 0.08),
+        inset 0 0 40px 8px rgba(60, 100, 255, 0.12);
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+    .bpLayer {
+        opacity: 0.7 !important;
+        transition: none;
+    }
+    .bpDrawIn {
+        stroke-dashoffset: 0 !important;
+        animation: none !important;
+    }
+    .preloader {
+        transition: none;
+    }
+    .preloader[data-hidden="1"] {
+        filter: none;
+        mask-image: none;
+        -webkit-mask-image: none;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+    .blueprint {
+        transition: none;
+    }
+    .preloaderBrand,
+    .preloaderTagline {
+        opacity: 0.5;
+        transition: none;
+    }
+    .bloom {
+        display: none;
+    }
+}
+
+/* Theme toggle, font picker — removed (components deleted) */
+
+@media (prefers-reduced-motion: reduce) {
+    .hero {
+        transition: none;
+    }
+}
+
+/* ==========================================================
+   Sticky 3D canvas — stays fixed while user scrolls through
+   How It Works steps.  The scene "follows" the viewer.
+   ========================================================== */
+
+.stickyCanvas {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+/* The hero <section> inside the fixed canvas fills the viewport */
+.stickyCanvas .hero {
+    width: 100%;
+    height: 100svh;
+}
+
+/* Spacer: reserves the first 100vh so native scroll starts at
+   the right place (the fixed canvas visually "occupies" it). */
+.heroSpacer {
+    height: 100svh;
+    position: relative;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ==========================================================
+   How It Works — scroll-driven storytelling (3 chapters)
+   ========================================================== */
+
+.howItWorks {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ── Chapter container — each full-viewport section ── */
+
+.chapter {
+    position: relative;
+    min-height: 100svh;
+    padding: clamp(32px, 6vw, 80px);
+    pointer-events: auto;
+    display: grid;
+    align-items: center;
+    /* Prevent double-tap zoom delay on touch devices.
+       Vercel Web Interface Guidelines: `touch-action: manipulation`. */
+    touch-action: manipulation;
+    /* Named view timeline — chapterReveal children reference this
+       for scroll-driven staggered entrance animations. */
+    view-timeline-name: --chapter;
+    view-timeline-axis: block;
+}
+
+/* ── Staggered scroll-driven reveal ──
+   Uses animation-timeline: --chapter (the parent .chapter's view timeline)
+   so reveal progress is tied directly to the section scrolling into view.
+   Each child staggers via animation-delay, creating a progressive cascade.
+
+   This replaces the old --reveal-progress CSS variable approach that
+   stepped at 20fps (50ms React setState throttle). */
+
+@keyframes chapterChildReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chapter .chapterReveal {
+    opacity: 0;
+    transform: translateY(24px);
+    will-change: opacity, transform;
+    /* Native scroll-driven animation — compositor thread */
+    animation: chapterChildReveal linear both;
+    animation-timeline: --chapter;
+    animation-range: entry 35% cover 25%;
+}
+
+/* Stagger: each child delays its animation-range start slightly.
+   Using animation-delay with scroll-driven animations offsets
+   the range proportionally — 50ms per child equivalent. */
+.chapterReveal:nth-child(1) {
+    animation-range: entry 35% cover 25%;
+}
+.chapterReveal:nth-child(2) {
+    animation-range: entry 38% cover 28%;
+}
+.chapterReveal:nth-child(3) {
+    animation-range: entry 41% cover 31%;
+}
+.chapterReveal:nth-child(4) {
+    animation-range: entry 44% cover 34%;
+}
+.chapterReveal:nth-child(5) {
+    animation-range: entry 47% cover 37%;
+}
+.chapterReveal:nth-child(6) {
+    animation-range: entry 50% cover 40%;
+}
+.chapterReveal:nth-child(7) {
+    animation-range: entry 53% cover 43%;
+}
+
+/* Fallback for browsers without scroll-driven animations */
+@supports not (animation-timeline: view()) {
+    .chapter .chapterReveal {
+        animation: none;
+        opacity: 0;
+        transform: translateY(28px);
+        transition:
+            opacity 0.35s ease-in,
+            transform 0.35s ease-in;
+    }
+    .chapter[data-visible="1"] .chapterReveal {
+        --p: var(--reveal-progress, 1);
+        opacity: var(--p);
+        transform: translateY(calc(28px * (1 - var(--p))));
+        transition:
+            opacity 0.5s cubic-bezier(0.22, 0.9, 0.32, 1),
+            transform 0.5s cubic-bezier(0.22, 0.9, 0.32, 1);
+    }
+    .chapterReveal:nth-child(1) {
+        transition-delay: 0ms;
+    }
+    .chapterReveal:nth-child(2) {
+        transition-delay: 50ms;
+    }
+    .chapterReveal:nth-child(3) {
+        transition-delay: 100ms;
+    }
+    .chapterReveal:nth-child(4) {
+        transition-delay: 150ms;
+    }
+    .chapterReveal:nth-child(5) {
+        transition-delay: 200ms;
+    }
+    .chapterReveal:nth-child(6) {
+        transition-delay: 250ms;
+    }
+    .chapterReveal:nth-child(7) {
+        transition-delay: 300ms;
+    }
+}
+
+/* ── Chapter 1: Character Select — full-screen transparent HUD ── */
+
+.charSelect {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
+    padding: clamp(24px, 4vw, 64px) clamp(24px, 4vw, 64px) clamp(16px, 3vw, 40px);
+    pointer-events: auto;
+    /* Named view timeline — children (pill, rolodex) reference this
+       so their animations are tied to the SECTION's viewport visibility,
+       not their own (which can be wrong for absolutely-positioned children). */
+    view-timeline-name: --showcase;
+    view-timeline-axis: block;
+}
+
+/* Title block — top center */
+.charSelectTitle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.charSelectLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent, #f06ba0);
+    opacity: 0.7;
+}
+
+.charSelectName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4.5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+    text-align: center;
+    text-transform: uppercase;
+    animation: charNameIn 0.4s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+@keyframes charNameIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+        filter: blur(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* Side stats — removed (previous design iteration) */
+
+/* Roster bar — bottom horizontal strip */
+.charRoster {
+    display: flex;
+    gap: 2px;
+    z-index: 1;
+    pointer-events: auto;
+    justify-content: center;
+    flex-wrap: nowrap;
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+        opacity 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) 0.3s,
+        transform 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) 0.3s;
+}
+
+.charSelect[data-visible="1"] .charRoster {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.charRosterSlot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    background: rgba(8, 8, 8, 0.4);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        background 250ms ease,
+        transform 200ms ease;
+    min-width: 80px;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+}
+
+:global([data-theme="light"]) .charRosterSlot {
+    background: rgba(245, 245, 245, 0.4);
+    border-color: rgba(0, 0, 0, 0.06);
+    color: var(--ink-muted, rgba(0, 0, 0, 0.5));
+}
+
+.charRosterSlot:hover {
+    border-color: rgba(240, 107, 160, 0.3);
+    background: rgba(240, 107, 160, 0.05);
+    transform: translateY(-2px);
+}
+
+.charRosterSlot:active {
+    transform: translateY(0) scale(0.97);
+    transition: transform 80ms ease;
+}
+
+:global([data-theme="light"]) .charRosterSlot:hover {
+    border-color: rgba(197, 68, 120, 0.25);
+    background: rgba(197, 68, 120, 0.04);
+}
+
+.charRosterSlot[data-active="true"] {
+    border-color: var(--accent, #f06ba0);
+    background: rgba(240, 107, 160, 0.08);
+    color: var(--ink, #f0f0f0);
+}
+
+:global([data-theme="light"]) .charRosterSlot[data-active="true"] {
+    border-color: var(--accent, #c54478);
+    background: rgba(197, 68, 120, 0.06);
+    color: var(--ink, #111111);
+}
+
+.charRosterIndex {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    opacity: 0.4;
+}
+
+.charRosterSlot[data-active="true"] .charRosterIndex {
+    color: var(--accent, #f06ba0);
+    opacity: 1;
+}
+
+:global([data-theme="light"]) .charRosterSlot[data-active="true"] .charRosterIndex {
+    color: var(--accent, #c54478);
+}
+
+.charRosterName {
+    font-family: var(--font-display-new), sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.charRosterPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--accent, #f06ba0);
+    opacity: 0;
+    transition: opacity 250ms ease;
+    margin-top: 2px;
+}
+
+.charRosterSlot[data-active="true"] .charRosterPrice {
+    opacity: 0.7;
+}
+
+/* Price tag — below roster */
+.charSelectPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(14px, 1.4vw, 20px);
+    letter-spacing: 0.15em;
+    color: var(--accent, #f06ba0);
+    z-index: 1;
+    pointer-events: none;
+    margin-top: 8px;
+    animation: charNameIn 0.3s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Transition mode label (dev helper) */
+.transitionModeLabel {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 20;
+    pointer-events: none;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent, #f06ba0);
+    opacity: 0.6;
+    text-transform: uppercase;
+}
+
+/* Chapter container — keep selection prevention so a wheel/swipe
+   gesture doesn't accidentally select text, but no grab cursor (the
+   chapter doesn't support continuous drag-to-rotate; the swipe is
+   a discrete snap, so a grab cursor would mislead). */
+.charSelect {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* ── Showcase Arrow Buttons — edge-anchored glass circles ── */
+
+.showcaseArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(8, 8, 8, 0.35);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 0;
+    transition:
+        opacity 0.5s ease 0.4s,
+        border-color 250ms ease,
+        color 250ms ease,
+        background 250ms ease,
+        transform 250ms ease;
+}
+
+.charSelect[data-visible="1"] .showcaseArrow {
+    opacity: 1;
+}
+
+.showcaseArrow:hover {
+    border-color: rgba(240, 107, 160, 0.4);
+    color: var(--accent, #f06ba0);
+    background: rgba(240, 107, 160, 0.08);
+    transform: translateY(-50%) scale(1.08);
+}
+
+.showcaseArrow:active {
+    transform: translateY(-50%) scale(0.92);
+    transition: transform 80ms ease;
+}
+
+:global([data-theme="light"]) .showcaseArrow {
+    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(245, 245, 245, 0.4);
+    color: var(--ink-muted, rgba(0, 0, 0, 0.4));
+}
+
+:global([data-theme="light"]) .showcaseArrow:hover {
+    border-color: rgba(197, 68, 120, 0.35);
+    color: var(--accent, #c54478);
+    background: rgba(197, 68, 120, 0.06);
+    box-shadow: 0 0 24px rgba(197, 68, 120, 0.08);
+}
+
+.showcaseArrowLeft {
+    left: clamp(20px, 3vw, 48px);
+}
+
+.showcaseArrowRight {
+    right: clamp(20px, 3vw, 48px);
+}
+
+/* ── Showcase Bottom — info strip + dots ── */
+
+.showcaseBottom {
+    --p: var(--reveal-progress, 1);
+    position: absolute;
+    bottom: clamp(32px, 5vh, 72px);
+    left: 50%;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+    opacity: var(--p);
+    /* Slides up from below with a subtle scale settle. Last in the
+       chapter-1 cascade — 200ms after chapter card. */
+    transform: translate3d(-50%, calc(20px * (1 - var(--p))), 0) scale(calc(0.96 + 0.04 * var(--p)));
+    transform-origin: 50% 100%;
+    transition:
+        opacity 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 200ms,
+        transform 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 200ms;
+}
+
+/* Info block — animated text */
+.showcaseInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    animation: showcaseInfoIn 0.45s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+@keyframes showcaseInfoIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+.showcaseName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 2.5vw, 32px);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+    line-height: 1.1;
+}
+
+.showcaseMeta {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(10px, 0.9vw, 12px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.45));
+}
+
+.showcasePrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(13px, 1.2vw, 16px);
+    letter-spacing: 0.12em;
+    color: var(--accent, #f06ba0);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Dot indicator ── */
+
+.showcaseDots {
+    display: flex;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+.showcaseDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    transition:
+        background 300ms ease,
+        border-color 300ms ease,
+        transform 300ms cubic-bezier(0.22, 0.9, 0.32, 1);
+}
+
+/* Invisible 44px hit target expansion */
+.showcaseDot::after {
+    content: "";
+    position: absolute;
+    inset: -18px;
+}
+
+.showcaseDot:hover {
+    border-color: rgba(240, 107, 160, 0.5);
+    transform: scale(1.3);
+}
+
+:global([data-theme="light"]) .showcaseDot {
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+:global([data-theme="light"]) .showcaseDot:hover {
+    border-color: rgba(197, 68, 120, 0.4);
+}
+
+.showcaseDot[data-active="true"] {
+    background: var(--accent, #f06ba0);
+    border-color: var(--accent, #f06ba0);
+    transform: scale(1.25);
+}
+
+:global([data-theme="light"]) .showcaseDot[data-active="true"] {
+    background: var(--accent, #c54478);
+    border-color: var(--accent, #c54478);
+}
+
+/* ── ВЫБЕРИ cinematic scroll-through section ── */
+
+.vyiberiSection {
+    --vyiberi-progress: 0;
+    min-height: 100svh;
+    position: relative;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ── ВЫБЕРИ scroll progress indicator ── */
+
+.vyiberiProgressWrap {
+    position: fixed;
+    bottom: clamp(24px, 3vh, 40px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    /* Visible only while scrolling through the ВЫБЕРИ section */
+    opacity: calc(
+        clamp(0, var(--vyiberi-progress) * 10, 1) * clamp(0, (1 - var(--vyiberi-progress)) * 5, 1)
+    );
+    transition: opacity 0.3s ease;
+}
+
+.vyiberiProgressBar {
+    width: clamp(120px, 15vw, 200px);
+    height: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+:global([data-theme="light"]) .vyiberiProgressBar {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.vyiberiProgressBar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        var(--accent, #f06ba0),
+        var(--accent, #f06ba0) 60%,
+        transparent
+    );
+    border-radius: 1px;
+    transform-origin: left;
+    transform: scaleX(var(--vyiberi-progress, 0));
+    transition: transform 0.15s ease-out;
+}
+
+:global([data-theme="light"]) .vyiberiProgressBar::after {
+    background: linear-gradient(
+        90deg,
+        var(--accent, #c54478),
+        var(--accent, #c54478) 60%,
+        transparent
+    );
+}
+
+.vyiberiHint {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+:global([data-theme="light"]) .vyiberiHint {
+    color: var(--ink-muted, rgba(0, 0, 0, 0.4));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vyiberiProgressBar::after {
+        transition: none;
+    }
+}
+
+/* ── A4: Swipe hand morph hint ── */
+
+.swipeHints {
+    position: absolute;
+    bottom: clamp(32px, 5vh, 60px);
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.swipeHints[data-visible="true"] {
+    opacity: 1;
+}
+
+.swipeHandContainer {
+    position: relative;
+    width: clamp(32px, 5vw, 52px);
+    height: clamp(32px, 5vw, 52px);
+    animation: swipeHandMorph 3s ease-in-out 3;
+}
+
+.swipeHandPoint,
+.swipeHandDrag {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--ink, #f0f0f0);
+    opacity: 0;
+    transition: none;
+}
+
+:global([data-theme="light"]) .swipeHandPoint,
+:global([data-theme="light"]) .swipeHandDrag {
+    color: var(--ink, #111111);
+}
+
+.swipeHandPoint {
+    animation: swipePointAnim 3s ease-in-out 3;
+}
+
+.swipeHandDrag {
+    animation: swipeDragAnim 3s ease-in-out 3;
+}
+
+/* Pointing hand: visible 0%→25%, fades out 25%→35% */
+@keyframes swipePointAnim {
+    0% {
+        opacity: 0.5;
+        transform: translateX(0);
+    }
+    15% {
+        opacity: 0.5;
+        transform: translateX(0);
+    }
+    30% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Drag hand: fades in 25%→35%, slides right 35%→80%, fades out 80%→100% */
+@keyframes swipeDragAnim {
+    0% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    25% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    35% {
+        opacity: 0.5;
+        transform: translateX(0);
+    }
+    75% {
+        opacity: 0.5;
+        transform: translateX(20px);
+    }
+    90% {
+        opacity: 0;
+        transform: translateX(24px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+}
+
+/* Container animation: gentle float to match hand morph */
+@keyframes swipeHandMorph {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* ── Chapter 2: Body Model — bust-on-podium with bottom-left
+   nameplate + right-edge zone rail. The grid layout from earlier
+   variants is retired; the chapter is a pure overlay container. */
+
+.chapter2 {
+    display: block;
+    grid-template-columns: none;
+    gap: 0;
+}
+
+/* ── Chapter 3: Reserve — asymmetric climax frame.
+   Bottom-left nameplate, bottom-right wireframe dossier with the
+   single Telegram CTA. The 3D scene fills the upper two-thirds with
+   the room dollied fully back; the DOM occupies only the corners so
+   the whole story compresses into one frame. ── */
+
+.chapter3 {
+    display: block;
+    grid-template-columns: none;
+    gap: 0;
+    justify-items: stretch;
+    text-align: left;
+}
+
+/* The previous Ch2 dark→light theme flip was retired in the Ch2 rework.
+   The studio reads as one continuous dark space across all chapters;
+   the bust appears on the existing podium rather than swapping to a
+   new world. No --ink override; tokens stay at their canonical values. */
+
+/* ==========================================================
+   Glass HUD Panel — reusable glass card with animated border
+   ========================================================== */
+
+.hudPanel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 1.8vw, 24px);
+    max-width: 560px;
+    background: rgba(8, 8, 8, 0.6);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(28px, 3.5vw, 48px);
+    overflow: hidden;
+}
+
+:global([data-theme="light"]) .hudPanel {
+    background: rgba(245, 245, 245, 0.65);
+    backdrop-filter: blur(28px) saturate(1.3);
+    -webkit-backdrop-filter: blur(28px) saturate(1.3);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Animated gold border glow on entry */
+.hudPanel::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease 0.3s;
+}
+
+.chapter[data-visible="1"] .hudPanel::before {
+    opacity: 1;
+    border-color: rgba(240, 107, 160, 0.2);
+}
+
+:global([data-theme="light"]) .chapter[data-visible="1"] .hudPanel::before {
+    border-color: rgba(197, 68, 120, 0.15);
+}
+
+/* ==========================================================
+   Step Label / Heading / Body — shared typographic styles
+   ========================================================== */
+
+.stepLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(11px, 1vw, 13px);
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent, #f06ba0);
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stepLabelLine {
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--accent, #f06ba0);
+    opacity: 0.3;
+}
+
+.stepHeading {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+    text-wrap: balance;
+}
+
+.stepHeading em {
+    font-style: normal;
+    color: var(--accent, #f06ba0);
+}
+
+.stepBody {
+    font-size: clamp(14px, 1.1vw, 17px);
+    line-height: 1.6;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    margin: 0;
+    max-width: 420px;
+}
+
+/* ==========================================================
+   Step CTA button — dot + monospace label
+   ========================================================== */
+
+.stepCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: clamp(8px, 1vw, 16px);
+    cursor: pointer;
+    transition: gap 300ms ease;
+    text-decoration: none;
+}
+
+.stepCta:hover {
+    gap: 14px;
+}
+
+.stepCtaDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent, #f06ba0);
+    transition: opacity 300ms ease;
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%,
+    100% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.stepCta:hover .stepCtaDot {
+    opacity: 1;
+    animation: none;
+}
+
+.stepCtaText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(10px, 0.9vw, 12px);
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+    transition: color 200ms ease;
+}
+
+.stepCta:hover .stepCtaText {
+    color: var(--accent, #f06ba0);
+}
+
+/* ==========================================================
+   Scan Line — horizontal light sweep
+   ========================================================== */
+
+.scanLine {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(240, 107, 160, 0.5) 30%,
+        rgba(240, 107, 160, 0.8) 50%,
+        rgba(240, 107, 160, 0.5) 70%,
+        transparent 100%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0);
+}
+
+:global([data-theme="light"]) .scanLine {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(197, 68, 120, 0.4) 30%,
+        rgba(197, 68, 120, 0.65) 50%,
+        rgba(197, 68, 120, 0.4) 70%,
+        transparent 100%
+    );
+}
+
+.scanLine[data-active="1"] {
+    animation: scanSweep 1.2s cubic-bezier(0.22, 0.9, 0.32, 1) forwards;
+}
+
+@keyframes scanSweep {
+    0% {
+        opacity: 0;
+        transform: translateY(0);
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(calc(100% + 100svh));
+    }
+}
+
+/* ==========================================================
+   TypeIn Text — monospace type-in effect
+   ========================================================== */
+
+.typeInText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(10px, 0.9vw, 12px);
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+}
+
+.typeInCursor {
+    color: var(--accent, #f06ba0);
+    animation: cursorBlink 0.7s step-end infinite;
+    margin-left: 1px;
+    font-size: 0.85em;
+}
+
+@keyframes cursorBlink {
+    0%,
+    50% {
+        opacity: 1;
+    }
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* ==========================================================
+   CountUp — numeric counter styling
+   ========================================================== */
+
+.countUp {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    letter-spacing: 0.15em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================
+   Jewelry Card Strip — Chapter 1 carousel
+   ========================================================== */
+
+.jewelryStrip {
+    display: flex;
+    gap: clamp(10px, 1.2vw, 16px);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding: 4px 0;
+    margin: 0 -4px;
+}
+
+.jewelryStrip::-webkit-scrollbar {
+    display: none;
+}
+
+.jewelryCard {
+    flex: 0 0 clamp(140px, 14vw, 180px);
+    scroll-snap-align: start;
+    position: relative;
+    background: rgba(8, 8, 8, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(14px, 1.5vw, 20px);
+    cursor: pointer;
+    transition:
+        border-color 300ms ease,
+        box-shadow 300ms ease,
+        transform 200ms ease;
+    overflow: hidden;
+}
+
+:global([data-theme="light"]) .jewelryCard {
+    background: rgba(245, 245, 245, 0.55);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.jewelryCard:hover {
+    border-color: rgba(240, 107, 160, 0.25);
+    transform: translateY(-2px);
+}
+
+:global([data-theme="light"]) .jewelryCard:hover {
+    border-color: rgba(197, 68, 120, 0.2);
+}
+
+.jewelryCard[data-active="true"] {
+    border-color: rgba(240, 107, 160, 0.4);
+}
+
+:global([data-theme="light"]) .jewelryCard[data-active="true"] {
+    border-color: rgba(197, 68, 120, 0.35);
+}
+
+/* Card scan line on hover */
+.jewelryCard::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(240, 107, 160, 0.5), transparent);
+    opacity: 0;
+    transform: translateY(0);
+    pointer-events: none;
+    transition: none;
+}
+
+.jewelryCard:hover::after {
+    animation: cardScan 0.8s cubic-bezier(0.22, 0.9, 0.32, 1) forwards;
+}
+
+@keyframes cardScan {
+    0% {
+        opacity: 0;
+        transform: translateY(0);
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(120px);
+    }
+}
+
+.jewelryCardIcon {
+    width: clamp(36px, 4vw, 52px);
+    height: clamp(36px, 4vw, 52px);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent, #f06ba0);
+    opacity: 0.7;
+}
+
+.jewelryCardIcon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.jewelryCardName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 700;
+    font-size: clamp(13px, 1.2vw, 16px);
+    color: var(--ink, #f0f0f0);
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.jewelryCardMaterial {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent, #f06ba0);
+    opacity: 0.7;
+    margin-bottom: 8px;
+}
+
+.jewelryCardPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(11px, 1vw, 14px);
+    letter-spacing: 0.1em;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+}
+
+/* ==========================================================
+   Body Area Selector — Chapter 2 HUD menu
+   ========================================================== */
+
+.areaSelector {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.areaItem {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1.2vw, 16px);
+    padding: clamp(10px, 1.2vw, 14px) clamp(14px, 1.5vw, 20px);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 1px;
+    cursor: pointer;
+    transition:
+        background 200ms ease,
+        border-color 200ms ease;
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 600;
+    font-size: clamp(14px, 1.2vw, 17px);
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    text-align: left;
+}
+
+.areaItem:hover {
+    background: rgba(240, 107, 160, 0.04);
+    border-color: rgba(240, 107, 160, 0.1);
+    color: var(--ink, #f0f0f0);
+}
+
+.areaItem:active {
+    transform: scale(0.98);
+    transition: transform 80ms ease;
+}
+
+:global([data-theme="light"]) .areaItem:hover {
+    background: rgba(197, 68, 120, 0.04);
+    border-color: rgba(197, 68, 120, 0.1);
+    color: var(--ink, #111111);
+}
+
+.areaItem[data-active="true"] {
+    background: rgba(240, 107, 160, 0.08);
+    border-color: rgba(240, 107, 160, 0.2);
+    color: var(--accent, #f06ba0);
+}
+
+:global([data-theme="light"]) .areaItem[data-active="true"] {
+    background: rgba(197, 68, 120, 0.06);
+    border-color: rgba(197, 68, 120, 0.15);
+    color: var(--accent, #c54478);
+}
+
+.areaItemIcon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+.areaItem[data-active="true"] .areaItemIcon {
+    opacity: 1;
+}
+
+.areaItemLabel {
+    flex: 1;
+}
+
+.areaItemBadge {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 2px 8px;
+    background: rgba(240, 107, 160, 0.1);
+    color: var(--accent, #f06ba0);
+    border-radius: 1px;
+}
+
+:global([data-theme="light"]) .areaItemBadge {
+    background: rgba(197, 68, 120, 0.08);
+    color: var(--accent, #c54478);
+}
+
+/* ==========================================================
+   Chapter 3 — Reserve Summary Styles
+   ========================================================== */
+
+.reserveWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(24px, 3vw, 40px);
+    max-width: 720px;
+    width: 100%;
+}
+
+.reservePrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--ink, #f0f0f0);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.reservePriceCurrency {
+    font-size: 0.45em;
+    color: var(--accent, #f06ba0);
+    vertical-align: super;
+    margin-left: 4px;
+}
+
+.reserveItems {
+    display: flex;
+    gap: clamp(10px, 1.5vw, 20px);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.reserveItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: rgba(8, 8, 8, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    font-size: clamp(12px, 1vw, 14px);
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+}
+
+:global([data-theme="light"]) .reserveItem {
+    background: rgba(245, 245, 245, 0.55);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Staggered slide-in for reserve items */
+.reserveItem:nth-child(1) {
+    transition-delay: 100ms;
+}
+.reserveItem:nth-child(2) {
+    transition-delay: 200ms;
+}
+.reserveItem:nth-child(3) {
+    transition-delay: 300ms;
+}
+
+.chapter[data-visible="1"] .reserveItem {
+    animation: reserveItemIn 0.5s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+.chapter[data-visible="1"] .reserveItem:nth-child(1) {
+    animation-delay: 0.4s;
+}
+.chapter[data-visible="1"] .reserveItem:nth-child(2) {
+    animation-delay: 0.5s;
+}
+.chapter[data-visible="1"] .reserveItem:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes reserveItemIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reserveItemDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent, #f06ba0);
+}
+
+/* Primary CTA button — Chapter 3 */
+
+.ctaPrimary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: clamp(14px, 1.5vw, 18px) clamp(32px, 4vw, 56px);
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 700;
+    font-size: clamp(13px, 1.2vw, 16px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bg, #080808);
+    background: var(--accent, #f06ba0);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 200ms ease;
+    text-decoration: none;
+}
+
+.ctaPrimary:hover {
+    transform: translateY(-1px);
+}
+
+/* P4: First-visibility attention bounce */
+.chapter[data-visible="1"] .ctaPrimary {
+    animation: ctaBounceIn 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) 0.7s both;
+}
+
+@keyframes ctaBounceIn {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.03);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.ctaPrimary:active {
+    transform: translateY(0) scale(0.97);
+    transition: transform 80ms ease;
+}
+
+:global([data-theme="light"]) .ctaPrimary:hover {
+    transform: translateY(-1px);
+}
+
+/* Scan-line sweep on hover — resets cleanly between entries */
+.ctaPrimary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.25) 40%,
+        rgba(255, 255, 255, 0.35) 50%,
+        rgba(255, 255, 255, 0.25) 60%,
+        transparent 100%
+    );
+    transform: translateX(-120%);
+    pointer-events: none;
+    /* animation: none forces a fresh trigger on each hover entry */
+    animation: none;
+}
+
+.ctaPrimary:hover::after {
+    animation: ctaSweep 0.6s ease forwards;
+}
+
+/* Idle shimmer — draws attention every 5s when not hovered */
+.ctaPrimary:not(:hover)::after {
+    animation: ctaIdleShimmer 5s ease-in-out 2s infinite;
+}
+
+@keyframes ctaSweep {
+    to {
+        transform: translateX(120%);
+    }
+}
+
+@keyframes ctaIdleShimmer {
+    0%,
+    85% {
+        transform: translateX(-120%);
+        opacity: 0;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+
+/* Secondary CTA */
+
+.ctaSecondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: clamp(12px, 1.3vw, 16px) clamp(24px, 3vw, 40px);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(10px, 0.9vw, 12px);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+    cursor: pointer;
+    transition:
+        border-color 200ms ease,
+        color 200ms ease;
+    text-decoration: none;
+}
+
+.ctaSecondary:hover {
+    border-color: var(--accent, #f06ba0);
+    color: var(--accent, #f06ba0);
+}
+
+.ctaSecondary:active {
+    transform: scale(0.97);
+    transition: transform 80ms ease;
+}
+
+:global([data-theme="light"]) .ctaSecondary {
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+:global([data-theme="light"]) .ctaSecondary:hover {
+    border-color: var(--accent, #c54478);
+    color: var(--accent, #c54478);
+}
+
+.ctaRow {
+    display: flex;
+    gap: clamp(12px, 1.5vw, 20px);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ==========================================================
+   Chapter 3 — wireframe dossier (bottom-right etched plate)
+   ==========================================================
+   The dossier is the museum nameplate equivalent of the climax —
+   it names the visitor's curation, totals the price, and ends in
+   the single ceremonial Telegram CTA. No card, no shadow, no glass.
+   Just hairline rules and instrument-spec type. */
+
+.dossier {
+    position: absolute;
+    bottom: clamp(28px, 5vh, 56px);
+    right: clamp(24px, 4vw, 64px);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    width: clamp(260px, 28vw, 340px);
+    pointer-events: auto;
+    /* Hairline frame — no fill, no shadow. Reads as etched plate. */
+    border: 1px solid rgba(240, 240, 240, 0.18);
+    padding: clamp(16px, 1.6vw, 22px) clamp(18px, 1.8vw, 24px);
+    /* Hidden by default; slides in from off-stage-right */
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+    will-change: opacity, transform;
+    transition:
+        opacity 0.3s ease-in,
+        transform 0.3s ease-in;
+}
+
+:global([data-theme="light"]) .dossier {
+    border-color: rgba(0, 0, 0, 0.18);
+}
+
+.chapter[data-visible="1"] .dossier {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition:
+        opacity 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) 0.2s,
+        transform 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) 0.2s;
+}
+
+.dossierTotal {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-family: var(--font-display-new), sans-serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink, #f0f0f0);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.dossierTotalCurrency {
+    font-size: 0.55em;
+    font-weight: 500;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.7));
+    margin-left: 4px;
+}
+
+.dossierTotalLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.55));
+    margin-top: -6px;
+}
+
+.dossierRule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: rgba(240, 240, 240, 0.12);
+}
+
+:global([data-theme="light"]) .dossierRule {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.dossierItems {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dossierItem {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    align-items: center;
+    column-gap: 10px;
+}
+
+.dossierItemTick {
+    width: 8px;
+    height: 1px;
+    background: var(--ink-muted, rgba(240, 240, 240, 0.4));
+    justify-self: end;
+}
+
+.dossierItemName {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dossierItemPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.65));
+    font-variant-numeric: tabular-nums;
+}
+
+.dossierStudio {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    align-items: baseline;
+}
+
+.dossierStudioLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    margin: 0;
+}
+
+.dossierStudioValue {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+}
+
+/* Single ceremonial CTA — flat, hairline, accent. No filled pill, no
+   shadow, no gradient. The CTA is a doorway, not a button. */
+.dossierCta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 4px;
+    padding: 14px 4px 14px 0;
+    border: 0;
+    border-top: 1px solid rgba(240, 107, 160, 0.4);
+    background: transparent;
+    cursor: pointer;
+    color: var(--accent, #f06ba0);
+    text-decoration: none;
+    transition:
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+:global([data-theme="light"]) .dossierCta {
+    border-top-color: rgba(197, 68, 120, 0.4);
+}
+
+.dossierCta:hover {
+    color: var(--ink, #f0f0f0);
+    border-top-color: var(--accent, #f06ba0);
+}
+
+.dossierCta:focus-visible {
+    outline: 1px solid var(--accent, #f06ba0);
+    outline-offset: 4px;
+}
+
+.dossierCtaText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(13px, 1.2vw, 15px);
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.dossierCtaArrow {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1;
+    transform: translateX(0);
+    transition: transform 0.2s cubic-bezier(0.22, 0.9, 0.32, 1);
+}
+
+.dossierCta:hover .dossierCtaArrow {
+    transform: translateX(4px);
+}
+
+@media (max-width: 880px) {
+    .dossier {
+        width: clamp(220px, 36vw, 300px);
+        padding: 14px 16px;
+    }
+    .dossierTotal {
+        font-size: clamp(30px, 5vw, 40px);
+    }
+}
+
+@media (max-width: 480px) {
+    /* On phones the dossier centers and stacks below the nameplate. */
+    .dossier {
+        position: absolute;
+        right: 50%;
+        bottom: 28px;
+        width: min(86vw, 320px);
+        transform: translate3d(50%, 12px, 0);
+    }
+    .chapter[data-visible="1"] .dossier {
+        transform: translate3d(50%, 0, 0);
+    }
+    /* Ch3 nameplate moves above the dossier on phones */
+    .chapter3 .nameplate {
+        bottom: auto;
+        top: clamp(80px, 12vh, 140px);
+        left: 50%;
+        right: auto;
+        align-items: center;
+        text-align: center;
+        max-width: min(80vw, 320px);
+        transform: translate3d(-50%, 12px, 0);
+    }
+    .chapter3[data-visible="1"] .nameplate {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dossier {
+        transition: none !important;
+        transform: translate3d(0, 0, 0) !important;
+        opacity: 1 !important;
+    }
+    .dossierCtaArrow {
+        transition: none !important;
+    }
+}
+
+/* ==========================================================
+   Epilogue — afterimage between Ch3 climax and the footer
+   ==========================================================
+   Three brief columns of quiet copy (Студия / Пирсер / Уход).
+   Transparent backdrop so the 3D scene continues showing through
+   from Ch3's dollied-back position. No CTAs. No scroll-driven
+   motion. The text scrolls in front of the same room. */
+
+.epilogue {
+    position: relative;
+    z-index: 2;
+    min-height: 60svh;
+    padding: clamp(80px, 12vh, 140px) clamp(24px, 4vw, 80px);
+    pointer-events: auto;
+    color: var(--ink, #f0f0f0);
+}
+
+/* Single hairline rule across the top — closing punctuation. */
+.epilogueRule {
+    display: block;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto clamp(48px, 6vh, 80px);
+    height: 1px;
+    background: rgba(240, 240, 240, 0.1);
+}
+
+:global([data-theme="light"]) .epilogueRule {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.epilogueGrid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(40px, 5vw, 96px);
+    align-items: start;
+}
+
+.epilogueCol {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    margin: 0;
+}
+
+/* Hairline vertical divider between adjacent columns — quiet
+   structural punctuation, not a card border. */
+.epilogueCol + .epilogueCol::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: calc(-0.5 * clamp(40px, 5vw, 96px));
+    width: 1px;
+    height: 28px;
+    background: rgba(240, 240, 240, 0.1);
+}
+
+:global([data-theme="light"]) .epilogueCol + .epilogueCol::before {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.epilogueLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.55));
+    margin: 0;
+}
+
+.epilogueBody {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(13px, 1vw, 14px);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.55;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+    max-width: 38ch;
+}
+
+@media (max-width: 760px) {
+    .epilogueGrid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    .epilogueCol + .epilogueCol::before {
+        display: none;
+    }
+}
+
+/* ==========================================================
+   Scroll Progress Navigation — right edge dots
+   ========================================================== */
+
+.scrollNav {
+    position: fixed;
+    right: clamp(16px, 2vw, 28px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    pointer-events: auto;
+}
+
+.scrollNavDot {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    cursor: pointer;
+    transition:
+        background 300ms ease,
+        border-color 300ms ease,
+        box-shadow 300ms ease,
+        width 300ms cubic-bezier(0.22, 0.9, 0.32, 1),
+        transform 300ms cubic-bezier(0.22, 0.9, 0.32, 1);
+    padding: 0;
+}
+
+/* Tooltip on hover — CSS only */
+.scrollNavDot::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(4px);
+    white-space: nowrap;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity 200ms ease,
+        transform 200ms ease;
+}
+
+.scrollNavDot:hover::before {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+:global([data-theme="light"]) .scrollNavDot {
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.scrollNavDot:hover {
+    border-color: var(--accent, #f06ba0);
+}
+
+.scrollNavDot:active {
+    transform: scale(0.85);
+    transition: transform 80ms ease;
+}
+
+.scrollNavDot[data-active="true"] {
+    width: 10px;
+    height: 10px;
+    background: var(--accent, #f06ba0);
+    border-color: var(--accent, #f06ba0);
+    transform: scale(1.2);
+}
+
+:global([data-theme="light"]) .scrollNavDot[data-active="true"] {
+    background: var(--accent, #c54478);
+    border-color: var(--accent, #c54478);
+}
+
+/* ==========================================================
+   Chapter visual column — empty space for 3D content
+   ========================================================== */
+
+.chapterVisual {
+    /* Occupies grid cell — 3D content renders behind via fixed canvas */
+    min-height: 300px;
+}
+
+/* ==========================================================
+   Jewelry Display Card — Chapter 1 right column
+   ========================================================== */
+
+.jewelryDisplayCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    justify-self: center;
+    width: 100%;
+    max-width: 420px;
+    background: rgba(8, 8, 8, 0.5);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+:global([data-theme="light"]) .jewelryDisplayCard {
+    background: rgba(245, 245, 245, 0.6);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.jewelryDisplayCard[data-visible="1"] {
+    border-color: rgba(240, 107, 160, 0.15);
+    box-shadow: 0 0 40px rgba(240, 107, 160, 0.04);
+}
+
+:global([data-theme="light"]) .jewelryDisplayCard[data-visible="1"] {
+    border-color: rgba(197, 68, 120, 0.12);
+    box-shadow: 0 0 40px rgba(197, 68, 120, 0.03);
+}
+
+/* Top area — where the 3D jewelry piece renders (via the fixed canvas behind) */
+.jewelryDisplayViewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Subtle crosshair in the center of the viewport */
+.jewelryDisplayViewport::before {
+    content: "";
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(240, 107, 160, 0.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+:global([data-theme="light"]) .jewelryDisplayViewport::before {
+    border-color: rgba(197, 68, 120, 0.1);
+}
+
+.jewelryDisplayViewport::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(240, 107, 160, 0.2);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+:global([data-theme="light"]) .jewelryDisplayViewport::after {
+    background: rgba(197, 68, 120, 0.15);
+}
+
+/* Corner brackets — tech frame around viewport */
+.displayCorner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+.displayCorner::before,
+.displayCorner::after {
+    content: "";
+    position: absolute;
+    background: rgba(240, 107, 160, 0.25);
+}
+
+:global([data-theme="light"]) .displayCorner::before,
+:global([data-theme="light"]) .displayCorner::after {
+    background: rgba(197, 68, 120, 0.2);
+}
+
+.displayCorner::before {
+    width: 100%;
+    height: 1px;
+}
+
+.displayCorner::after {
+    width: 1px;
+    height: 100%;
+}
+
+.displayCorner[data-pos="tl"] {
+    top: 12px;
+    left: 12px;
+}
+.displayCorner[data-pos="tl"]::before {
+    top: 0;
+    left: 0;
+}
+.displayCorner[data-pos="tl"]::after {
+    top: 0;
+    left: 0;
+}
+
+.displayCorner[data-pos="tr"] {
+    top: 12px;
+    right: 12px;
+}
+.displayCorner[data-pos="tr"]::before {
+    top: 0;
+    right: 0;
+}
+.displayCorner[data-pos="tr"]::after {
+    top: 0;
+    right: 0;
+}
+
+.displayCorner[data-pos="bl"] {
+    bottom: 12px;
+    left: 12px;
+}
+.displayCorner[data-pos="bl"]::before {
+    bottom: 0;
+    left: 0;
+}
+.displayCorner[data-pos="bl"]::after {
+    bottom: 0;
+    left: 0;
+}
+
+.displayCorner[data-pos="br"] {
+    bottom: 12px;
+    right: 12px;
+}
+.displayCorner[data-pos="br"]::before {
+    bottom: 0;
+    right: 0;
+}
+.displayCorner[data-pos="br"]::after {
+    bottom: 0;
+    right: 0;
+}
+
+/* Stats bar — bottom of the card */
+.jewelryDisplayStats {
+    padding: clamp(16px, 2vw, 24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+:global([data-theme="light"]) .jewelryDisplayStats {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.jewelryDisplayName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 700;
+    font-size: clamp(18px, 1.8vw, 24px);
+    color: var(--ink, #f0f0f0);
+    line-height: 1.2;
+}
+
+.jewelryDisplayMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.jewelryDisplayTag {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(240, 107, 160, 0.2);
+    color: var(--accent, #f06ba0);
+    border-radius: 1px;
+    white-space: nowrap;
+}
+
+:global([data-theme="light"]) .jewelryDisplayTag {
+    border-color: rgba(197, 68, 120, 0.15);
+    color: var(--accent, #c54478);
+}
+
+.jewelryDisplayPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(14px, 1.3vw, 18px);
+    letter-spacing: 0.08em;
+    color: var(--ink, #f0f0f0);
+}
+
+/* Arrow nav row */
+.jewelryDisplayNav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(16px, 2vw, 24px) clamp(16px, 2vw, 24px);
+}
+
+.jewelryNavArrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    cursor: pointer;
+    transition:
+        border-color 200ms ease,
+        color 200ms ease;
+    font-size: 16px;
+    padding: 0;
+}
+
+:global([data-theme="light"]) .jewelryNavArrow {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--ink-muted, rgba(0, 0, 0, 0.5));
+}
+
+.jewelryNavArrow:hover {
+    border-color: var(--accent, #f06ba0);
+    color: var(--accent, #f06ba0);
+}
+
+.jewelryNavArrow:active {
+    transform: scale(0.92);
+    transition: transform 80ms ease;
+}
+
+:global([data-theme="light"]) .jewelryNavArrow:hover {
+    border-color: var(--accent, #c54478);
+    color: var(--accent, #c54478);
+}
+
+.jewelryNavCounter {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+}
+
+/* ==========================================================
+   Chapter label decorators
+   ========================================================== */
+
+.chapterDivider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(240, 107, 160, 0.2) 20%,
+        rgba(240, 107, 160, 0.2) 80%,
+        transparent
+    );
+    margin: 8px 0;
+}
+
+:global([data-theme="light"]) .chapterDivider {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(197, 68, 120, 0.15) 20%,
+        rgba(197, 68, 120, 0.15) 80%,
+        transparent
+    );
+}
+
+/* ==========================================================
+   Mobile: single-column stacking for all chapters
+   ========================================================== */
+
+@media (max-width: 768px) {
+    .charSelect,
+    .chapter2,
+    .chapter3 {
+        grid-template-columns: 1fr;
+        padding: clamp(24px, 5vw, 48px);
+    }
+
+    .charSelect {
+        padding: 16px;
+    }
+
+    .charRoster {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .charRosterSlot {
+        min-width: 60px;
+        padding: 8px 10px;
+    }
+
+    .charSelectName {
+        font-size: clamp(24px, 7vw, 36px);
+    }
+
+    .hudPanel {
+        max-width: 100%;
+    }
+
+    .chapterVisual {
+        min-height: 200px;
+    }
+
+    .jewelryDisplayCard {
+        max-width: 100%;
+    }
+
+    .scrollNav {
+        display: none;
+    }
+
+    .jewelryStrip {
+        margin: 0 -24px;
+        padding: 0 24px;
+    }
+
+    .reservePrice {
+        font-size: clamp(32px, 10vw, 56px);
+    }
+}
+
+/* ==========================================================
+   Reduced motion — respect prefers-reduced-motion
+   ========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .chapter .chapterReveal {
+        opacity: 1;
+        transform: none;
+    }
+
+    .chapter[data-visible="1"] .chapterReveal {
+        --p: 1;
+    }
+
+    .chapterReveal {
+        transition: none !important;
+    }
+
+    .scanLine {
+        display: none;
+    }
+
+    .stepCtaDot {
+        animation: none;
+    }
+
+    .ctaPrimary::after {
+        display: none;
+    }
+
+    .jewelryCard::after {
+        display: none;
+    }
+
+    .swipeHandContainer,
+    .swipeHandPoint,
+    .swipeHandDrag {
+        animation: none;
+    }
+
+    .swipeHandPoint {
+        opacity: 0.5;
+    }
+
+    .scrollNavDot[data-active="true"] {
+        transform: none;
+    }
+
+    /* New animation overrides */
+    .chapter[data-visible="1"] .ctaPrimary {
+        animation: none;
+    }
+
+    .chapter[data-visible="1"] .reserveItem {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* ==========================================================
+   Site shell — shares the dark Steel Atelier tokens with the
+   hero so chrome (nav, hero-overlay, footer) can use them too.
+   ========================================================== */
+
+.siteShell {
+    --bg: #080808;
+    --bg-elev: #111111;
+    --ink: #f0f0f0;
+    --ink-muted: rgba(240, 240, 240, 0.5);
+    --ink-line: rgba(255, 255, 255, 0.1);
+    --ink-line-strong: rgba(255, 255, 255, 0.22);
+    --accent: #f06ba0;
+    --rule: rgba(240, 240, 240, 0.16);
+    background: var(--bg);
+    color: var(--ink);
+}
+
+:global([data-theme="light"]) .siteShell {
+    --bg: #f5f5f5;
+    --bg-elev: #ebebeb;
+    --ink: #111111;
+    --ink-muted: rgba(0, 0, 0, 0.5);
+    --ink-line: rgba(0, 0, 0, 0.1);
+    --ink-line-strong: rgba(0, 0, 0, 0.22);
+    --accent: #c54478;
+    --rule: rgba(0, 0, 0, 0.18);
+}
+
+/* ==========================================================
+   Floating chrome header — plain corners, no pill / no blur.
+   Brand top-left, nav center (quiet during hero), CTA top-right.
+   ChromeHeader wrapper still toggles data-hidden on scroll-down.
+   ========================================================== */
+
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(20px, 2.4vh, 28px) clamp(20px, 3vw, 36px);
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    transition:
+        transform 360ms cubic-bezier(0.22, 0.9, 0.32, 1),
+        opacity 360ms ease;
+}
+
+.nav[data-hidden="1"] {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.navBrand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display-new), var(--font-display, sans-serif);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    font-size: 12px;
+    color: var(--ink);
+    text-decoration: none;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+}
+
+:global([data-theme="light"]) .navBrand {
+    text-shadow: 0 1px 12px rgba(255, 255, 255, 0.45);
+}
+
+.navBrandDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+/* Center nav links — visible but quiet during hero, full strength after.
+   data-hero is set from the page based on activeChapter (0 = hero). */
+.navLinks {
+    display: flex;
+    gap: clamp(20px, 2.6vw, 32px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    transition: opacity 0.5s ease;
+}
+
+.navLinks[data-hero="1"] {
+    opacity: 0.5;
+}
+
+.navLinks a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    transition:
+        color 0.2s ease,
+        opacity 0.2s ease;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+}
+
+:global([data-theme="light"]) .navLinks a {
+    text-shadow: 0 1px 12px rgba(255, 255, 255, 0.45);
+}
+
+.navLinks a:hover {
+    color: var(--accent);
+}
+
+.navActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Thin-bordered CTA — visible without the heavy pill.  */
+.navCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink-line-strong);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.navCta:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+}
+
+.navCtaDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+/* Hamburger — hidden on desktop, visible below 820px */
+.navBurger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.navBurgerLine {
+    display: block;
+    width: 20px;
+    height: 1.5px;
+    background: var(--ink);
+    border-radius: 1px;
+    transition:
+        transform 250ms ease,
+        opacity 250ms ease;
+}
+
+.navBurgerLine:first-child[data-open="1"] {
+    transform: translateY(3.75px) rotate(45deg);
+}
+
+.navBurgerLine:last-child[data-open="1"] {
+    transform: translateY(-3.75px) rotate(-45deg);
+}
+
+@media (max-width: 820px) {
+    .navLinks {
+        display: none;
+    }
+    .nav {
+        padding: 16px 18px;
+    }
+    .navBurger {
+        display: flex;
+    }
+}
+
+/* Mobile overlay menu */
+.mobileMenu {
+    position: fixed;
+    inset: 0;
+    z-index: 29;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    background: rgba(8, 8, 8, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    animation: mobileMenuIn 0.25s ease-out both;
+}
+
+:global([data-theme="light"]) .mobileMenu {
+    background: rgba(245, 245, 245, 0.92);
+}
+
+@keyframes mobileMenuIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.mobileMenuLink {
+    font-family: var(--font-display-new), sans-serif;
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.mobileMenuLink:hover {
+    color: var(--accent);
+}
+
+/* Screen reader only — visually hidden */
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ==========================================================
+   Site footer
+   ========================================================== */
+
+.siteFooter {
+    position: relative;
+    z-index: 3;
+    background: var(--bg);
+    color: var(--ink);
+    padding: clamp(60px, 8vw, 100px) clamp(24px, 4vw, 64px) 24px;
+    border-top: 1px solid var(--ink-line);
+}
+
+.footerCols {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: clamp(32px, 6vw, 96px);
+    flex-wrap: wrap;
+    margin-bottom: clamp(40px, 6vw, 72px);
+}
+
+.footerDesc {
+    max-width: 360px;
+    color: var(--ink-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.footerLinks {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: clamp(40px, 6vw, 96px);
+    margin-left: auto;
+}
+
+.footerLinks > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footerLinks a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.footerLinks a:hover {
+    color: var(--ink);
+}
+
+.footerH {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.footerWordmark {
+    margin: 0 calc(-1 * clamp(24px, 4vw, 64px));
+    padding: clamp(20px, 3vw, 40px) 0;
+    border-top: 1px solid var(--ink-line);
+    border-bottom: 1px solid var(--ink-line);
+    font-family: var(--font-display-new), var(--font-display, sans-serif);
+    font-weight: 700;
+    font-size: clamp(56px, 16vw, 240px);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    text-align: center;
+    white-space: nowrap;
+    color: var(--ink);
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.footerWordmark > span {
+    color: var(--ink-muted);
+    margin: 0 0.04em;
+    font-weight: 400;
+}
+
+.footerBase {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-top: 24px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 820px) {
+    .footerCols {
+        flex-direction: column;
+        gap: 36px;
+    }
+    .footerLinks {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .footerLinks {
+        grid-template-columns: 1fr;
+    }
+    .footerBase {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* ==========================================================
+   Phone breakpoint — additional polish below 480px
+   ========================================================== */
+
+@media (max-width: 480px) {
+    .heroOverlay {
+        padding: 88px 16px 32px;
+    }
+    .heroLede {
+        font-size: 14px;
+    }
+    .chapter {
+        padding: 24px 16px;
+    }
+    .charSelect {
+        padding: 12px;
+    }
+}
+
+/* ==========================================================
+   Chapter 1 — instrument nameplate + Rolodex picker
+   ========================================================== */
+
+/* The chapter title "ВЫБЕРИ" is rendered as a 3D <Text> in the canvas
+   (AnimatedChooseText in WireframeRoom.tsx), so the DOM does NOT carry
+   a chapter heading. The .nameplate (bottom-left) surfaces the active
+   piece's instrument specs — material, gauge · weight, price — as a
+   museum exhibit caption. The .rolodex (right edge) is the picker. */
+
+/* ── ChooseIntro — discrete section spacer ──
+   The "ВЫБЕРИ" title itself is rendered as a drei <Text> in the 3D
+   scene (see AnimatedChooseText in WireframeRoom.tsx) so it can sit
+   in front of the podium and glow via the bloom pass. The DOM only
+   provides the scroll space + ref. */
+
+.chooseIntroSpacer {
+    position: relative;
+    width: 100%;
+    height: 100svh;
+    pointer-events: none;
+}
+
+/* ── Ch2 grid overlay ──
+   2D HTML grid that slides up from the bottom of the viewport to take
+   over from the held 3D floor close-up. Visually matches the 3D
+   floor's pattern: minor lines every cell, brighter major lines every
+   5 cells, real + cross marks at major intersections (drawn via
+   inline SVG so they read as crisp pluses, not fuzzy dots).
+
+   Slide is driven by JS-set --grid-translate / --grid-scale-y /
+   --grid-opacity (read from ch2BodyPhase each frame). transform-origin
+   is bottom so the squash-then-settle reads anchored to the rising
+   edge.
+
+   Pointer-events: none so the chapter content underneath remains
+   interactive. */
+/* Theme inversion: the 2D grid is the OPPOSITE theme of the page.
+   When the page is dark (default), the grid is light (Bone Ink bg
+   with dark hairlines + + crosses). When the page is light, the
+   grid is dark. This frames Ch2 as a clinical lightbox / x-ray
+   moment — the viewer steps from the dark museum into a bright
+   examination floor without changing the world the room itself is
+   in. The 3D scene's bg never flips; only this overlay does. */
+.ch2GridOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: var(--grid-opacity, 0);
+    /* Light theme overlay (default = dark page).
+       Bone Ink-ish bg, dark hairlines token-aligned with Steel
+       Atelier's light companion colors (rgba(0,0,0,0.06/0.22/0.32)). */
+    background-color: #f0f0f0;
+    --cell: 56px;
+    --major-cell: calc(var(--cell) * 5);
+    --minor-color: rgba(0, 0, 0, 0.06);
+    --major-color: rgba(0, 0, 0, 0.22);
+    --cross-color: rgba(0, 0, 0, 0.32);
+    background-image:
+        /* + cross marks at major intersections — inline SVG */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280' viewBox='0 0 280 280'><line x1='140' y1='124' x2='140' y2='156' stroke='rgba(0,0,0,0.32)' stroke-width='1.5' stroke-linecap='round'/><line x1='124' y1='140' x2='156' y2='140' stroke='rgba(0,0,0,0.32)' stroke-width='1.5' stroke-linecap='round'/></svg>"),
+        linear-gradient(to right, var(--major-color) 1.5px, transparent 1.5px),
+        linear-gradient(to bottom, var(--major-color) 1.5px, transparent 1.5px),
+        linear-gradient(to right, var(--minor-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--minor-color) 1px, transparent 1px);
+    background-size:
+        var(--major-cell) var(--major-cell),
+        var(--major-cell) var(--major-cell),
+        var(--major-cell) var(--major-cell),
+        var(--cell) var(--cell),
+        var(--cell) var(--cell);
+    /* Center alignment: a major-cell intersection lands at viewport
+       center (50%, 50%), with the + cross anchored to it. Then minor
+       lines align to the same center because var(--cell) divides
+       var(--major-cell) evenly by 5. The half-pixel adjustments
+       center the lines on the mathematical 50% rather than to the
+       left of it. */
+    background-position:
+        50% 50%,
+        calc(50% - 0.75px) calc(50% - 0.75px),
+        calc(50% - 0.75px) calc(50% - 0.75px),
+        calc(50% - 0.5px) calc(50% - 0.5px),
+        calc(50% - 0.5px) calc(50% - 0.5px);
+    transform-origin: center bottom;
+    transform: translateY(var(--grid-translate, 100%)) scaleY(var(--grid-scale-y, 1.15));
+    will-change: transform, opacity;
+}
+
+/* When the user prefers light, the page itself is light — flip the
+   2D grid to dark so the inversion holds. The 3D scene stays as
+   designed; only this overlay swaps. */
+@media (prefers-color-scheme: light) {
+    .ch2GridOverlay {
+        background-color: #080808;
+        --minor-color: rgba(255, 255, 255, 0.06);
+        --major-color: rgba(255, 255, 255, 0.22);
+        --cross-color: rgba(255, 255, 255, 0.32);
+        background-image:
+            url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280' viewBox='0 0 280 280'><line x1='140' y1='124' x2='140' y2='156' stroke='rgba(255,255,255,0.32)' stroke-width='1.5' stroke-linecap='round'/><line x1='124' y1='140' x2='156' y2='140' stroke='rgba(255,255,255,0.32)' stroke-width='1.5' stroke-linecap='round'/></svg>"),
+            linear-gradient(to right, var(--major-color) 1.5px, transparent 1.5px),
+            linear-gradient(to bottom, var(--major-color) 1.5px, transparent 1.5px),
+            linear-gradient(to right, var(--minor-color) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--minor-color) 1px, transparent 1px);
+    }
+}
+
+/* ── Ch2 zone marker ──
+   Magenta dot anchored at a grid intersection on the 2D Ch2 overlay.
+   Slides between zones via transform translate (GPU, no reflow), with
+   ease-out-expo so the snap reads confident, never bouncy.
+
+   Fixed-positioned at viewport center; the dot itself is offset by
+   (--marker-x, --marker-y) which the React component sets per zone.
+   Pointer-events: none so the chapter UI underneath stays clickable. */
+.ch2ZoneMarker {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    margin-top: -6px;
+    border-radius: 999px;
+    background: #f06ba0; /* Studio Magenta */
+    box-shadow: 0 0 0 1px #f06ba0;
+    transform: translate(var(--marker-x, 0px), var(--marker-y, 0px));
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    opacity: 0; /* JS sets opacity each frame from ch2BodyPhase */
+    will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ch2ZoneMarker {
+        transition: none;
+    }
+}
+
+/* ── Pill / Rolodex — transition-based entrance/exit ──
+   Triggered by the binary data-visible attribute on .charSelect.
+   The entrance plays when the section is centered in the viewport
+   (data-visible="1"), giving the user time to see the animation.
+   
+   Unlike scroll-driven animations (which scrub with scroll position
+   and finish before the user's eyes focus on the section), these
+   fire a visible pop-in when the user lands in Chapter 1. */
+
+/* Instrument nameplate — bottom-left museum caption.
+   Replaces the redundant "ГЛАВА 01 | ВЫБЕРИ" pill (the chapter title is
+   already rendered in 3D as floating type at z=-19). Surfaces the active
+   piece's specs in the medical-instrument register: material in sans,
+   gauge · weight in mono, price in mono accent. Asymmetric to the
+   right-edge rolodex — together they read as a two-corner exhibit HUD. */
+
+.nameplate {
+    position: absolute;
+    bottom: clamp(28px, 5vh, 56px);
+    left: clamp(24px, 4vw, 64px);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    pointer-events: none;
+    max-width: clamp(180px, 22vw, 260px);
+    /* Hidden by default — slides in from off-stage-left */
+    opacity: 0;
+    transform: translate3d(-16px, 0, 0);
+    will-change: opacity, transform;
+    transition:
+        opacity 0.3s ease-in,
+        transform 0.3s ease-in;
+}
+
+/* Reveal trigger applies to both Ch1 (.charSelect) and Ch2 (.chapter2)
+   nameplates — the chapter base class .chapter carries the data-visible
+   attribute for any chapter that uses an absolute-positioned nameplate. */
+.chapter[data-visible="1"] .nameplate {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition:
+        opacity 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 0.1s,
+        transform 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 0.1s;
+}
+
+.nameplateMaterial {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.7));
+    line-height: 1.2;
+}
+
+.nameplateRule {
+    width: 22px;
+    height: 1px;
+    background: rgba(240, 240, 240, 0.32);
+}
+
+:global([data-theme="light"]) .nameplateRule {
+    background: rgba(0, 0, 0, 0.28);
+}
+
+.nameplateSpec {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.55));
+    font-variant-numeric: tabular-nums;
+}
+
+.nameplatePrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(14px, 1.3vw, 17px);
+    letter-spacing: 0.1em;
+    color: var(--accent, #f06ba0);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* Rolodex picker — right-edge strip with rail (left of strip) +
+   sliding window holding prev / active / next entries.
+   Direction-aware variants on the JSX side animate enter/exit so
+   the bar visibly slides on swap rather than pop-replacing. */
+
+.rolodex {
+    --rolodex-strip-w: 240px;
+    --rolodex-row-h: 40px;
+    position: absolute;
+    right: clamp(20px, 3vw, 56px);
+    top: 50%;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 16px;
+    align-items: center;
+    padding: 0;
+    /* Glass card removed — the picker is ground, the 3D piece is figure. */
+    border: 0;
+    background: transparent;
+    width: var(--rolodex-strip-w);
+    pointer-events: auto;
+    /* Hidden by default */
+    opacity: 0;
+    transform: translate3d(20px, -50%, 0);
+    will-change: opacity, transform;
+    /* Exit transition */
+    transition:
+        opacity 0.3s ease-in,
+        transform 0.3s ease-in;
+}
+
+/* Entrance: staggered slightly after the pill */
+.charSelect[data-visible="1"] .rolodex {
+    opacity: 1;
+    transform: translate3d(0, -50%, 0);
+    transition:
+        opacity 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 0.2s,
+        transform 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 0.2s;
+}
+
+.rolodexRail {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Rail dots — each button gets its own non-overlapping hit area
+   (16×24px, 4px of padding above and below the visible mark). The
+   visible vertical bar lives in a child span so the bar can grow
+   for the active state without enlarging the click area or
+   reflowing neighbors. The previous design used `::after` with
+   negative insets to enlarge the hit area, but the expansions
+   overlapped adjacent dots and the later sibling won the click —
+   so clicking the bottom of dot N triggered dot N+1. */
+.rolodexRailDot {
+    width: 16px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rolodexRailDotMark {
+    display: block;
+    width: 3px;
+    height: 14px;
+    border-radius: 1.5px;
+    background: rgba(255, 255, 255, 0.14);
+    transition:
+        background 0.2s ease,
+        height 0.3s ease;
+    pointer-events: none;
+}
+
+.rolodexRailDot:hover .rolodexRailDotMark {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.rolodexRailDot[data-active="true"] .rolodexRailDotMark {
+    background: var(--accent, #f06ba0);
+    height: 20px;
+}
+
+.rolodexWindow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: calc(var(--rolodex-row-h) * 3 + 12px);
+    overflow: hidden;
+}
+
+.rolodexHalo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0;
+    height: var(--rolodex-row-h);
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.55);
+    transition: color 0.2s ease;
+    text-align: right;
+    will-change: transform, opacity;
+}
+
+.rolodexHalo:hover {
+    color: rgba(240, 240, 240, 0.8);
+}
+
+.rolodexHaloNum {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--accent, #f06ba0);
+    opacity: 0.5;
+}
+
+.rolodexHaloName {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.rolodexActive {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    height: var(--rolodex-row-h);
+    padding: 0 12px 0 0;
+    /* Side-stripe border removed (impeccable absolute-ban). The
+       trailing .rolodexActiveDot already marks active state. */
+    margin-left: auto;
+    text-align: right;
+    will-change: transform, opacity, filter;
+    position: relative;
+}
+
+.rolodexActiveNum {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--accent, #f06ba0);
+}
+
+.rolodexActiveName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(13px, 1.2vw, 17px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.rolodexActiveDot {
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent, #f06ba0);
+}
+
+@media (max-width: 880px) {
+    .rolodex {
+        --rolodex-strip-w: 220px;
+        --rolodex-row-h: 38px;
+    }
+    .rolodexActiveName {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* On phones, center the Rolodex above the nameplate. Override
+       the right-edge positioning with centered bottom positioning. */
+    .rolodex {
+        position: absolute;
+        right: 50%;
+        top: auto;
+        bottom: 130px;
+        /* Override the default hidden transform for phone layout */
+        transform: translate3d(50%, 20px, 0);
+    }
+    .charSelect[data-visible="1"] .rolodex {
+        transform: translate3d(50%, 0, 0);
+    }
+
+    /* Nameplate centers on mobile so it doesn't fight the centered
+       rolodex above it. */
+    .nameplate {
+        left: 50%;
+        right: auto;
+        align-items: center;
+        text-align: center;
+        max-width: min(80vw, 280px);
+        transform: translate3d(-50%, 12px, 0);
+    }
+    .chapter[data-visible="1"] .nameplate {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nameplate,
+    .rolodex,
+    .zoneRail {
+        transition: none !important;
+    }
+
+    /* Force visibility with layout-essential transforms */
+    .nameplate {
+        transform: translate3d(0, 0, 0) !important;
+        opacity: 1 !important;
+    }
+    .rolodex {
+        transform: translate3d(0, -50%, 0) !important;
+        opacity: 1 !important;
+    }
+    .zoneRail {
+        transform: translate3d(0, -50%, 0) !important;
+        opacity: 1 !important;
+    }
+}
+
+/* ==========================================================
+   Chapter 2 — nameplate Ch2-specific sub-elements + zone rail
+   ========================================================== */
+
+/* The Ch2 nameplate reuses the .nameplate base layout/animation but
+   adds chapter title (single Cyrillic verb ПРИМЕРЬ) + supporting line
+   ("Где встанет?") + the active zone label. Composes with the .nameplate
+   classes already declared above. */
+
+.nameplateChapter {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.55));
+    line-height: 1.2;
+}
+
+.nameplateHeading {
+    font-family: var(--font-display-new), sans-serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--ink, #f0f0f0);
+    text-transform: uppercase;
+}
+
+.nameplateSubhead {
+    font-family: var(--font-display-new), sans-serif;
+    font-size: clamp(13px, 1.3vw, 16px);
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.6));
+    line-height: 1.3;
+    margin-top: 2px;
+}
+
+.nameplateZoneLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent, #f06ba0);
+    font-variant-numeric: tabular-nums;
+    margin-top: 6px;
+}
+
+/* Zone rail — right edge vertical strip, mirrors the Ch1 rolodex
+   character. Each zone is a labeled tick: small dash + index + label.
+   Active zone rises in opacity and the tick lengthens. The dot at the
+   right edge of the active row marks the choice without requiring a
+   side-stripe (banned). */
+
+.zoneRail {
+    position: absolute;
+    right: clamp(20px, 3vw, 56px);
+    top: 50%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    pointer-events: auto;
+    /* Hidden by default; slides in from off-stage-right */
+    opacity: 0;
+    transform: translate3d(20px, -50%, 0);
+    will-change: opacity, transform;
+    transition:
+        opacity 0.3s ease-in,
+        transform 0.3s ease-in;
+}
+
+.chapter2[data-visible="1"] .zoneRail {
+    opacity: 1;
+    transform: translate3d(0, -50%, 0);
+    transition:
+        opacity 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 0.2s,
+        transform 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) 0.2s;
+}
+
+.zoneRailList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.zoneRailItem {
+    display: grid;
+    grid-template-columns: 18px 22px auto;
+    align-items: center;
+    column-gap: 10px;
+    padding: 12px 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.55);
+    text-align: left;
+    transition: color 0.2s ease;
+}
+
+.zoneRailItem:hover {
+    color: rgba(240, 240, 240, 0.7);
+}
+
+.zoneRailItem[data-active="true"] {
+    color: var(--ink, #f0f0f0);
+}
+
+.zoneRailTick {
+    width: 12px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+    transition:
+        width 0.25s cubic-bezier(0.22, 0.9, 0.32, 1),
+        opacity 0.25s ease;
+    justify-self: end;
+}
+
+.zoneRailItem[data-active="true"] .zoneRailTick {
+    width: 18px;
+    opacity: 1;
+    background: var(--accent, #f06ba0);
+}
+
+.zoneRailIndex {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--accent, #f06ba0);
+    opacity: 0.55;
+}
+
+.zoneRailItem[data-active="true"] .zoneRailIndex {
+    opacity: 1;
+}
+
+.zoneRailLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+@media (max-width: 880px) {
+    .zoneRailItem {
+        grid-template-columns: 16px 20px auto;
+        padding: 5px 0;
+    }
+    .zoneRailLabel {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* On phones, the zone rail moves to bottom-center above the
+       nameplate, mirroring the Ch1 rolodex mobile layout. */
+    .zoneRail {
+        position: absolute;
+        right: 50%;
+        top: auto;
+        bottom: 200px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 80vw;
+        transform: translate3d(50%, 20px, 0);
+    }
+    .chapter2[data-visible="1"] .zoneRail {
+        transform: translate3d(50%, 0, 0);
+    }
+    .zoneRailItem {
+        grid-template-columns: auto auto;
+    }
+    .zoneRailIndex {
+        display: none;
+    }
+    .zoneRailTick {
+        width: 8px;
+    }
+    .zoneRailItem[data-active="true"] .zoneRailTick {
+        width: 12px;
+    }
+
+    /* Ch2 nameplate also centers on mobile */
+    .chapter2 .nameplate {
+        left: 50%;
+        right: auto;
+        align-items: center;
+        text-align: center;
+        max-width: min(80vw, 280px);
+        transform: translate3d(-50%, 12px, 0);
+    }
+    .chapter2[data-visible="1"] .nameplate {
+        transform: translate3d(-50%, 0, 0);
+    }
+}

@@ -1,0 +1,703 @@
+/* ============================================================
+   Booking Wizard — Steel Atelier 4-step flow
+   ============================================================ */
+
+/* ── Page shell ── */
+.bookingPage {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 4vw, 40px);
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.bookingHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bookingTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(28px, 4.5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+}
+
+.bookingSubtitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(13px, 1.2vw, 15px);
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+/* ── Progress indicator ── */
+.progressBar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 clamp(8px, 2vw, 16px);
+}
+
+.progressStep {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    position: relative;
+}
+
+.progressStep:not(:last-child)::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+    margin: 0 12px;
+}
+
+.progressStep[data-active="true"]::after {
+    background: var(--accent);
+}
+
+.progressDot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--rule);
+    background: var(--bg-elev);
+    color: var(--ink-muted);
+    transition:
+        border-color 250ms ease,
+        background 250ms ease,
+        color 250ms ease;
+    flex-shrink: 0;
+}
+
+.progressDot[data-active="true"] {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.progressDot[data-completed="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.progressLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .progressLabel {
+        display: block;
+    }
+}
+
+.progressLabel[data-active="true"] {
+    color: var(--ink);
+}
+
+/* ── Step container ── */
+.stepContainer {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(20px, 3vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.stepTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+}
+
+/* ── Service selection (Step 1) ── */
+.categoryGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.categoryTitle {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.serviceGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.serviceCard {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 16px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition:
+        border-color 250ms ease,
+        transform 250ms ease;
+}
+
+.serviceCard:hover {
+    border-color: var(--accent);
+}
+
+.serviceCard:active {
+    transform: scale(0.98);
+}
+
+.serviceCard[data-selected="true"] {
+    border-color: var(--accent);
+    background: rgba(240, 107, 160, 0.05);
+}
+
+.serviceCard:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.serviceCard:disabled:hover {
+    border-color: var(--rule);
+}
+
+.serviceName {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+}
+
+.serviceDescription {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.serviceMeta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.servicePrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.serviceDuration {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+.selectionCount {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+/* ── Date/Time picker (Step 2) ── */
+.dateTimeContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.calendarMonth {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.calendarNavBtn {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ink);
+    transition: border-color 250ms ease;
+}
+
+.calendarNavBtn:hover:not(:disabled) {
+    border-color: var(--accent);
+}
+
+.calendarNavBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.calendarDayLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    text-align: center;
+    padding: 8px 0;
+}
+
+.calendarDay {
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    padding: 8px 4px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: center;
+    transition:
+        border-color 250ms ease,
+        background 250ms ease;
+}
+
+.calendarDay:hover:not(:disabled) {
+    border-color: var(--rule);
+    background: var(--bg-elev);
+}
+
+.calendarDay[data-selected="true"] {
+    border-color: var(--accent);
+    background: rgba(240, 107, 160, 0.1);
+    color: var(--accent);
+}
+
+.calendarDay[data-today="true"] {
+    font-weight: 600;
+}
+
+.calendarDay:disabled {
+    color: var(--ink-muted);
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.calendarDay[data-empty="true"] {
+    visibility: hidden;
+}
+
+.timeSlotsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.timeSlotsTitle {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.timeSlotsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+}
+
+.timeSlot {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 10px 8px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: center;
+    transition:
+        border-color 250ms ease,
+        background 250ms ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.timeSlot:hover {
+    border-color: var(--accent);
+}
+
+.timeSlot[data-selected="true"] {
+    border-color: var(--accent);
+    background: rgba(240, 107, 160, 0.1);
+    color: var(--accent);
+}
+
+.timeSlotsLoading {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted);
+    padding: 16px 0;
+}
+
+.timeSlotsEmpty {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted);
+    padding: 16px 0;
+}
+
+/* ── Contact form (Step 3) ── */
+.contactForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.formFieldFull {
+    composes: formField;
+    grid-column: 1 / -1;
+}
+
+.formLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.formInput {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 10px 12px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 250ms ease;
+}
+
+.formInput::placeholder {
+    color: var(--ink-muted);
+}
+
+.formInput:hover,
+.formInput:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.formInput[data-error="true"] {
+    border-color: #ef4444;
+}
+
+.formTextarea {
+    composes: formInput;
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.formError {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    color: #ef4444;
+    margin: 0;
+}
+
+/* ── Waiver & Signature (Step 4) ── */
+.waiverSection {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.waiverText {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    white-space: pre-wrap;
+}
+
+.signatureSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.signatureLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.signatureCanvas {
+    width: 100%;
+    height: 150px;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.signatureCanvas[data-signed="true"] {
+    border-color: var(--accent);
+}
+
+.signatureActions {
+    display: flex;
+    gap: 12px;
+}
+
+.clearSignatureBtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 6px 12px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease;
+}
+
+.clearSignatureBtn:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+}
+
+/* ── Navigation buttons ── */
+.stepNav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+}
+
+.backBtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 10px 20px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 250ms ease;
+}
+
+.backBtn:hover {
+    border-color: var(--accent);
+}
+
+.nextBtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 10px 24px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        background 250ms ease,
+        color 250ms ease;
+}
+
+.nextBtn:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.nextBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.submitBtn {
+    composes: nextBtn;
+}
+
+/* ── Confirmation ── */
+.confirmation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+    padding: 32px 16px;
+}
+
+.confirmationIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(240, 107, 160, 0.1);
+    border: 1px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 24px;
+}
+
+.confirmationTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+}
+
+.confirmationRef {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.confirmationDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+}
+
+/* ── Error state ── */
+.errorMessage {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 2px;
+    padding: 12px 16px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: #ef4444;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .serviceGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .timeSlotsGrid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .serviceCard,
+    .calendarDay,
+    .calendarNavBtn,
+    .timeSlot,
+    .formInput,
+    .backBtn,
+    .nextBtn,
+    .clearSignatureBtn,
+    .progressDot {
+        transition: none;
+    }
+}

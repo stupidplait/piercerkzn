@@ -1,0 +1,92 @@
+[
+  {
+    "name": "left_earlobe",
+    "display_name": "Left Earlobe",
+    "body_area": "ear_left",
+    "position_x": 0.0722,
+    "position_y": 1.634,
+    "position_z": -0.0149,
+    "rotation_x": 0,
+    "rotation_y": 0,
+    "rotation_z": 0,
+    "normal_x": 0.551,
+    "normal_y": -0.7471,
+    "normal_z": 0.3718,
+    "compatible_jewelry_types": [
+      "stud",
+      "hoop",
+      "ring"
+    ],
+    "compatible_gauges": [
+      "20g",
+      "18g",
+      "16g"
+    ]
+  },
+  {
+    "name": "left_nostril",
+    "display_name": "Left Nostril",
+    "body_area": "nose",
+    "position_x": 0.004,
+    "position_y": 1.6532,
+    "position_z": 0.0961,
+    "rotation_x": 0,
+    "rotation_y": 0,
+    "rotation_z": 0,
+    "normal_x": 0.6595,
+    "normal_y": 0.4578,
+    "normal_z": 0.5962,
+    "compatible_jewelry_types": [
+      "stud",
+      "ring"
+    ],
+    "compatible_gauges": [
+      "20g",
+      "18g"
+    ]
+  },
+  {
+    "name": "labret",
+    "display_name": "Labret",
+    "body_area": "lip",
+    "position_x": 0.0,
+    "position_y": 1.6059,
+    "position_z": 0.0822,
+    "rotation_x": 0,
+    "rotation_y": 0,
+    "rotation_z": 0,
+    "normal_x": -0.1319,
+    "normal_y": -0.5406,
+    "normal_z": 0.8309,
+    "compatible_jewelry_types": [
+      "stud",
+      "ring"
+    ],
+    "compatible_gauges": [
+      "16g",
+      "14g"
+    ]
+  },
+  {
+    "name": "left_eyebrow",
+    "display_name": "Left Eyebrow",
+    "body_area": "eyebrow",
+    "position_x": 0.035,
+    "position_y": 1.7174,
+    "position_z": 0.0764,
+    "rotation_x": 0,
+    "rotation_y": 0,
+    "rotation_z": 0,
+    "normal_x": 0.463,
+    "normal_y": 0.2134,
+    "normal_z": 0.8603,
+    "compatible_jewelry_types": [
+      "barbell",
+      "ring"
+    ],
+    "compatible_gauges": [
+      "16g",
+      "14g"
+    ]
+  }
+]

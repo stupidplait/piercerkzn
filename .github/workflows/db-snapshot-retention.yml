@@ -1,0 +1,55 @@
+name: db-snapshot-retention
+
+on:
+    schedule:
+        - cron: "0 4 * * 1"
+    workflow_dispatch: {}
+
+concurrency:
+    group: db-snapshot-retention
+
+jobs:
+    retention:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+            AWS_DEFAULT_REGION: auto
+            R2_ENDPOINT: ${{ secrets.R2_S3_ENDPOINT }}
+        steps:
+            - name: Delete dumps older than 12 weeks
+              run: |
+                  set -euo pipefail
+                  horizon=$(date -u -d "12 weeks ago" +%Y-%m-%dT00:00:00Z)
+                  aws s3api list-objects-v2 \
+                    --endpoint-url "$R2_ENDPOINT" \
+                    --bucket piercerkzn-assets \
+                    --prefix "backups/" \
+                    --query "Contents[?LastModified<=\`$horizon\`].[Key]" \
+                    --output text \
+                    | while read -r key; do
+                        [ -n "$key" ] && [ "$key" != "None" ] || continue
+                        echo "deleting $key"
+                        aws s3 rm "s3://piercerkzn-assets/$key" --endpoint-url "$R2_ENDPOINT"
+                      done
+
+    missed-cadence:
+        needs: [retention]
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: "9"
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: pnpm
+                  cache-dependency-path: pnpm-lock.yaml
+            - run: pnpm install --frozen-lockfile
+            - name: Check DR drill cadence
+              env:
+                  BETTERSTACK_INCOMING_WEBHOOK: ${{ secrets.BETTERSTACK_INCOMING_WEBHOOK }}
+              run: pnpm tsx scripts/check-dr-drill-cadence.ts

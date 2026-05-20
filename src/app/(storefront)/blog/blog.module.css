@@ -1,0 +1,395 @@
+/* ============================================================
+   Blog Index — Steel Atelier glass-panel cards
+   ============================================================ */
+
+/* ── Page shell ── */
+.blogPage {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 4vw, 40px);
+}
+
+.blogHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.blogTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(28px, 4.5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+}
+
+.blogSubtitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(13px, 1.2vw, 15px);
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+/* ── Filters panel ── */
+.filtersPanel {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(16px, 2vw, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.filtersRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.filterLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-right: 4px;
+}
+
+/* ── Category tabs ── */
+.categoryTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.categoryTab {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 6px 14px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease,
+        background 250ms ease;
+}
+
+.categoryTab:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+}
+
+.categoryTabActive {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 6px 14px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease,
+        background 250ms ease;
+}
+
+/* ── Tag chips ── */
+.tagChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.tagChip {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 4px 10px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease;
+}
+
+.tagChip:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+}
+
+.tagChipActive {
+    appearance: none;
+    background: rgba(240, 107, 160, 0.1);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 4px 10px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease;
+}
+
+/* ── Sort select ── */
+.sortGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.sortSelect {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 6px 12px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 250ms ease;
+}
+
+.sortSelect:hover,
+.sortSelect:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* ── Post grid ── */
+.postGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: clamp(16px, 2.5vw, 24px);
+}
+
+/* ── Post card (glass-panel) ── */
+.postCard {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    transition:
+        border-color 250ms ease,
+        transform 250ms ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.postCard:hover {
+    border-color: var(--accent);
+}
+
+.postCard:active {
+    transform: scale(0.98);
+}
+
+.cardLink {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.cardImage {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--bg-elev);
+}
+
+.cardImagePlaceholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-elev);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-muted);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+.cardBody {
+    padding: clamp(12px, 1.5vw, 20px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.cardTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cardExcerpt {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cardMeta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.cardDate {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+.cardReadTime {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.paginationInfo {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+.paginationBtn {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 8px 16px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.paginationBtn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.paginationBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ── Empty state ── */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 200px;
+    text-align: center;
+    padding: 32px;
+}
+
+.emptyStateTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+}
+
+.emptyStateText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .filtersRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sortGroup {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sortSelect {
+        width: 100%;
+    }
+
+    .postGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .postCard,
+    .categoryTab,
+    .categoryTabActive,
+    .tagChip,
+    .tagChipActive,
+    .sortSelect,
+    .paginationBtn {
+        transition: none;
+    }
+}

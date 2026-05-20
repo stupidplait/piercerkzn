@@ -1,0 +1,224 @@
+/* ============================================================
+   Account Settings — Profile edit & notification preferences
+   Steel Atelier design tokens
+   ============================================================ */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 2.5vw, 32px);
+}
+
+.pageTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 700;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+}
+
+.errorText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: #f87171;
+}
+
+/* ── Form ── */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 3vw, 40px);
+    max-width: 560px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sectionTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(16px, 1.4vw, 18px);
+    font-weight: 700;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule, rgba(240, 240, 240, 0.16));
+}
+
+.fieldGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink, #f0f0f0);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 250ms ease;
+}
+
+.input:focus {
+    border-color: var(--accent, #f06ba0);
+}
+
+.input[aria-invalid="true"] {
+    border-color: #f87171;
+}
+
+.fieldError {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    color: #f87171;
+}
+
+/* ── Toggle group ── */
+.toggleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.toggleInput {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggleSwitch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    transition: background-color 250ms ease;
+    flex-shrink: 0;
+}
+
+.toggleSwitch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: var(--ink, #f0f0f0);
+    border-radius: 50%;
+    transition: transform 250ms ease;
+}
+
+.toggleInput:checked + .toggleSwitch {
+    background: var(--accent, #f06ba0);
+}
+
+.toggleInput:checked + .toggleSwitch::after {
+    transform: translateX(16px);
+}
+
+.toggleInput:focus-visible + .toggleSwitch {
+    outline: 2px solid var(--accent, #f06ba0);
+    outline-offset: 2px;
+}
+
+.toggleLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink, #f0f0f0);
+}
+
+/* ── Actions ── */
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.submitButton {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent, #f06ba0);
+    background: transparent;
+    border: 1px solid var(--accent, #f06ba0);
+    border-radius: 2px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition:
+        background 250ms ease,
+        color 250ms ease,
+        transform 250ms ease;
+}
+
+.submitButton:hover {
+    background: var(--accent, #f06ba0);
+    color: var(--bg, #080808);
+}
+
+.submitButton:active {
+    transform: scale(0.98);
+}
+
+.submitButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.message {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+}
+
+.message[data-type="success"] {
+    color: #34d399;
+}
+
+.message[data-type="error"] {
+    color: #f87171;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .fieldGroup {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .input,
+    .toggleSwitch,
+    .toggleSwitch::after,
+    .submitButton {
+        transition: none;
+    }
+}

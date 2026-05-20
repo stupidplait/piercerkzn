@@ -1,0 +1,129 @@
+/* Public unsubscribe confirmation page.
+   Mirrors the cyanotype palette + brand header used by /auth/* so the
+   storefront and the unsubscribe terminus feel like the same site. */
+
+.shell {
+    position: relative;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px 48px;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.gridBackdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+        linear-gradient(var(--grid-minor) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px),
+        linear-gradient(var(--grid-major) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
+    background-size:
+        24px 24px,
+        24px 24px,
+        120px 120px,
+        120px 120px;
+    background-position:
+        -1px -1px,
+        -1px -1px,
+        -1px -1px,
+        -1px -1px;
+    mask-image: radial-gradient(circle at 50% 35%, #000 0%, transparent 75%);
+    -webkit-mask-image: radial-gradient(circle at 50% 35%, #000 0%, transparent 75%);
+    pointer-events: none;
+}
+
+.frame {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    text-decoration: none;
+    color: inherit;
+    user-select: none;
+}
+
+.brandMark {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+}
+
+.brandLine {
+    width: 28px;
+    height: 1px;
+    background: var(--accent);
+    display: block;
+}
+
+.brandSub {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.card {
+    background: var(--bg-elev);
+    border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+    border-radius: 4px;
+    padding: 32px 28px;
+    box-shadow:
+        0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+        0 24px 60px -32px color-mix(in srgb, var(--ink) 20%, transparent);
+    position: relative;
+}
+
+.heading {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+}
+
+.body {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.footnote {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.footLink {
+    color: var(--ink-muted);
+    text-decoration: none;
+    transition: color 120ms ease;
+}
+
+.footLink:hover {
+    color: var(--ink);
+}

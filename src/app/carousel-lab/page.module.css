@@ -1,0 +1,214 @@
+/* ============================================================
+   Carousel Lab — comparison playground for 8 picker mechanics
+   ============================================================ */
+
+/* ── Top toolbar: mechanic picker ── */
+
+.labToolbar {
+    position: fixed;
+    top: clamp(72px, 9vh, 96px); /* sit below the floating header */
+    left: 0;
+    right: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    pointer-events: none;
+    padding: 12px clamp(16px, 3vw, 32px);
+}
+
+.labToolbarKicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 45, 138, 0.35);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.78);
+    pointer-events: auto;
+}
+
+.labToolbarTag {
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+    letter-spacing: 0.4em;
+}
+
+.labToolbarPicker {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    background: rgba(8, 8, 8, 0.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    pointer-events: auto;
+    max-width: min(100%, 920px);
+    justify-content: center;
+}
+
+.labToolbarBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(240, 240, 240, 0.55);
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
+    font-family: inherit;
+}
+
+.labToolbarBtn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(240, 240, 240, 0.92);
+}
+
+.labToolbarBtn[data-active="true"] {
+    background: var(--accent, #ff2d8a);
+    color: #fff;
+    box-shadow: 0 6px 22px rgba(255, 45, 138, 0.32);
+}
+
+.labToolbarBtnIdx {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    opacity: 0.7;
+}
+
+.labToolbarBtnLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* ── Chapter card: pinned to upper-left ── */
+
+.labChapterCard {
+    position: absolute;
+    top: clamp(180px, 22vh, 220px);
+    left: clamp(24px, 4vw, 56px);
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+}
+
+.labChapterCardKicker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent, #ff2d8a);
+}
+
+.labChapterCardRule {
+    width: 22px;
+    height: 1px;
+    background: rgba(240, 240, 240, 0.4);
+}
+
+.labChapterCardTitle {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+}
+
+/* ── Mechanic layer + shared spec block ── */
+
+.labMechanicLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.labMechanicLayer > * {
+    pointer-events: auto;
+}
+
+.labSpec {
+    position: absolute;
+    bottom: clamp(96px, 14vh, 140px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    pointer-events: none;
+    animation: labSpecMaskIn 0.45s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+    width: min(86vw, 520px);
+}
+
+@keyframes labSpecMaskIn {
+    from {
+        opacity: 0;
+        clip-path: inset(0 50% 0 50%);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+.labSpecName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+}
+
+.labSpecMeta {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.55);
+}
+
+.labSpecPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(14px, 1.2vw, 16px);
+    letter-spacing: 0.16em;
+    color: var(--accent, #ff2d8a);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+@media (max-width: 720px) {
+    .labChapterCard {
+        top: clamp(220px, 28vh, 260px);
+    }
+}

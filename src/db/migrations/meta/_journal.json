@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778600424462,
+      "tag": "0000_colossal_lenny_balinger",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778697254766,
+      "tag": "0001_review_helpful_votes",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778704401076,
+      "tag": "0002_nice_quasar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778741200000,
+      "tag": "0003_product_fts",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778750000000,
+      "tag": "0004_product_media",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778760000000,
+      "tag": "0005_newsletter_campaign",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778770000000,
+      "tag": "0006_telegram_broadcast",
+      "breakpoints": true
+    }
+  ]
+}

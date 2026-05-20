@@ -1,0 +1,438 @@
+/* ============================================================
+   Catalog Page — Steel Atelier glass-panel cards
+   ============================================================ */
+
+/* ── Page shell ── */
+.catalogPage {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 4vw, 40px);
+}
+
+.catalogHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.catalogTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(28px, 4.5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+}
+
+.catalogSubtitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(13px, 1.2vw, 15px);
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+/* ── Filters panel ── */
+.filtersPanel {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(16px, 2vw, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.filtersRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 140px;
+    flex: 1;
+}
+
+.filterLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.filterSelect {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 250ms ease;
+}
+
+.filterSelect:hover,
+.filterSelect:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.searchInput {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    width: 100%;
+    max-width: 320px;
+    transition: border-color 250ms ease;
+}
+
+.searchInput::placeholder {
+    color: var(--ink-muted);
+}
+
+.searchInput:hover,
+.searchInput:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.priceRange {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.priceInput {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--ink);
+    width: 100px;
+    transition: border-color 250ms ease;
+}
+
+.priceInput::placeholder {
+    color: var(--ink-muted);
+}
+
+.priceInput:hover,
+.priceInput:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.priceSeparator {
+    color: var(--ink-muted);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+}
+
+.sortSelect {
+    composes: filterSelect;
+    min-width: 160px;
+}
+
+/* ── Product grid ── */
+.gridContainer {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 3vw, 32px);
+}
+
+.productGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: clamp(12px, 2vw, 20px);
+}
+
+/* ── Product card (glass-panel) ── */
+.productCard {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    transition:
+        border-color 250ms ease,
+        transform 250ms ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.productCard:hover {
+    border-color: var(--accent);
+}
+
+.productCard:active {
+    transform: scale(0.98);
+}
+
+.cardLink {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.cardThumbnail {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--bg-elev);
+}
+
+.cardThumbnailPlaceholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--bg-elev);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-muted);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+.cardBody {
+    padding: clamp(12px, 1.5vw, 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.cardTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cardMaterial {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+}
+
+.cardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.cardPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.stockBadge {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+
+.stockBadge[data-in-stock="1"] {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.stockBadge[data-in-stock="0"] {
+    color: var(--ink-muted);
+    background: rgba(240, 240, 240, 0.05);
+    border: 1px solid rgba(240, 240, 240, 0.08);
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.paginationInfo {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+.paginationBtn {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 8px 16px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.paginationBtn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.paginationBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ── States ── */
+.loadingOverlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--ink-muted);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 200px;
+    text-align: center;
+    padding: 32px;
+}
+
+.emptyStateTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+}
+
+.emptyStateText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.errorState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 200px;
+    text-align: center;
+    padding: 32px;
+}
+
+.errorText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.retryBtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 8px 20px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        background 250ms ease,
+        color 250ms ease;
+}
+
+.retryBtn:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.retryBtn:active {
+    transform: scale(0.98);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .filtersRow {
+        flex-direction: column;
+    }
+
+    .filterGroup {
+        min-width: 100%;
+    }
+
+    .searchInput {
+        max-width: 100%;
+    }
+
+    .productGrid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .productCard {
+        transition: none;
+    }
+
+    .filterSelect,
+    .searchInput,
+    .priceInput,
+    .paginationBtn,
+    .retryBtn {
+        transition: none;
+    }
+}

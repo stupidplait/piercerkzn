@@ -1,0 +1,45 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "crons": [
+        {
+            "path": "/api/cron/reservation-expiry",
+            "schedule": "*/15 * * * *"
+        },
+        {
+            "path": "/api/cron/booking-reminders",
+            "schedule": "*/15 * * * *"
+        },
+        {
+            "path": "/api/cron/aftercare-drip",
+            "schedule": "0 6 * * *"
+        },
+        {
+            "path": "/api/cron/satisfaction-survey",
+            "schedule": "0 7 * * *"
+        },
+        {
+            "path": "/api/cron/downsize-reminder",
+            "schedule": "15 7 * * *"
+        },
+        {
+            "path": "/api/cron/new-arrival",
+            "schedule": "*/30 * * * *"
+        },
+        {
+            "path": "/api/cron/newsletter-sweep",
+            "schedule": "*/15 * * * *"
+        },
+        {
+            "path": "/api/cron/telegram-broadcast-sweep",
+            "schedule": "*/15 * * * *"
+        },
+        {
+            "path": "/api/cron/reservation-expiring",
+            "schedule": "0 8 * * *"
+        },
+        {
+            "path": "/api/cron/daily-digest",
+            "schedule": "0 6 * * *"
+        }
+    ]
+}

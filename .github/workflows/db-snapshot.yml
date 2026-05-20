@@ -1,0 +1,49 @@
+name: db-snapshot
+
+on:
+    schedule:
+        - cron: "0 3 * * 1"
+    workflow_dispatch: {}
+
+concurrency:
+    group: db-snapshot
+    cancel-in-progress: false
+
+jobs:
+    snapshot:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - name: Install postgresql-client
+              run: |
+                  sudo apt-get update -qq
+                  sudo apt-get install -y -qq postgresql-client
+
+            - name: Compute object key
+              id: key
+              run: |
+                  echo "key=backups/$(date -u +%Y)/$(date -u +%m)/$(date -u +%d).sql.gz" >> "$GITHUB_OUTPUT"
+
+            - name: pg_dump → gzip → R2
+              env:
+                  DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+                  AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+                  AWS_DEFAULT_REGION: auto
+                  R2_ENDPOINT: ${{ secrets.R2_S3_ENDPOINT }}
+              run: |
+                  set -euo pipefail
+                  pg_dump --no-owner --no-acl --format=plain "$DATABASE_URL" \
+                    | gzip -9 \
+                    | aws s3 cp - "s3://piercerkzn-assets/${{ steps.key.outputs.key }}" \
+                        --endpoint-url "$R2_ENDPOINT" \
+                        --content-type application/gzip
+
+            - name: Notify on failure
+              if: failure()
+              env:
+                  BETTERSTACK_INCOMING_WEBHOOK: ${{ secrets.BETTERSTACK_INCOMING_WEBHOOK }}
+              run: |
+                  curl -fsSL -X POST "$BETTERSTACK_INCOMING_WEBHOOK" \
+                    -H 'content-type: application/json' \
+                    -d '{"severity":"critical","title":"db-snapshot failed","run_id":"${{ github.run_id }}"}'

@@ -1,0 +1,498 @@
+/* ============================================================
+   Product Detail Page — Steel Atelier design system
+   ============================================================ */
+
+/* ── Page shell ── */
+.pdpPage {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 4vw, 48px);
+}
+
+.pdpGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(24px, 4vw, 48px);
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .pdpGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Media column ── */
+.mediaColumn {
+    position: sticky;
+    top: 100px;
+}
+
+@media (max-width: 768px) {
+    .mediaColumn {
+        position: static;
+    }
+}
+
+/* ── Info column ── */
+.infoColumn {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 2.5vw, 24px);
+}
+
+.productTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(24px, 3.5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.specsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.specBadge {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--bg-elev);
+}
+
+.description {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(14px, 1.2vw, 15px);
+    line-height: 1.6;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+/* ── Variant section ── */
+.variantSection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.priceDisplay {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.price {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(20px, 2.5vw, 28px);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.stockIndicator {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+}
+
+.stockIndicator[data-in-stock="1"] {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.stockIndicator[data-in-stock="0"] {
+    color: var(--ink-muted);
+    background: rgba(240, 240, 240, 0.05);
+    border: 1px solid rgba(240, 240, 240, 0.08);
+}
+
+.variantList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.variantOption {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 250ms ease;
+}
+
+.variantOption:hover {
+    border-color: var(--accent);
+}
+
+.variantOption:active {
+    transform: scale(0.99);
+}
+
+.variantOptionActive {
+    border-color: var(--accent);
+    background: rgba(240, 107, 160, 0.05);
+}
+
+.variantTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.variantSpecs {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+}
+
+.variantPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.singleVariantSpecs {
+    padding: 8px 0;
+}
+
+.noVariants {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+/* ── Add to cart button ── */
+.addToCartBtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 14px 24px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        background 250ms ease,
+        color 250ms ease,
+        transform 100ms ease;
+    text-align: center;
+}
+
+.addToCartBtn:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.addToCartBtn:active {
+    transform: scale(0.98);
+}
+
+.addToCartBtnConfirm {
+    background: var(--accent);
+    color: var(--bg);
+    pointer-events: none;
+}
+
+/* ── 3D Try-on link ── */
+.tryOnLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 10px 0;
+    transition: opacity 250ms ease;
+}
+
+.tryOnLink:hover {
+    opacity: 0.8;
+}
+
+.tryOnIcon {
+    font-size: 18px;
+}
+
+/* ── Piercing area tags ── */
+.areaTagsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+}
+
+.areaTagsLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.areaTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.areaTag {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--bg-elev);
+    transition:
+        border-color 250ms ease,
+        color 250ms ease;
+}
+
+.areaTag:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ── Media Gallery ── */
+.gallery {
+    position: relative;
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.gallerySingle {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.galleryViewport {
+    overflow: hidden;
+}
+
+.galleryContainer {
+    display: flex;
+    touch-action: pan-y pinch-zoom;
+}
+
+.gallerySlide {
+    flex: 0 0 100%;
+    min-width: 0;
+}
+
+.galleryImage {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+}
+
+.galleryPlaceholder {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+}
+
+.galleryPlaceholderText {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+/* Gallery arrows */
+.galleryArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    appearance: none;
+    background: rgba(8, 8, 8, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    font-size: 20px;
+    cursor: pointer;
+    transition:
+        background 250ms ease,
+        border-color 250ms ease;
+    z-index: 2;
+}
+
+.galleryArrow:hover:not(:disabled) {
+    background: rgba(8, 8, 8, 0.9);
+    border-color: var(--accent);
+}
+
+.galleryArrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.galleryArrowPrev {
+    left: 12px;
+}
+
+.galleryArrowNext {
+    right: 12px;
+}
+
+/* Hide arrows on mobile (swipe instead) */
+@media (max-width: 768px) {
+    .galleryArrow {
+        display: none;
+    }
+}
+
+/* Gallery dots */
+.galleryDots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(8, 8, 8, 0.6));
+}
+
+.galleryDot {
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition:
+        background 250ms ease,
+        border-color 250ms ease;
+}
+
+.galleryDot:hover {
+    border-color: var(--accent);
+}
+
+.galleryDotActive {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ── Not Found page ── */
+.notFoundPage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+}
+
+.notFoundCard {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(32px, 4vw, 48px);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.notFoundTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(48px, 8vw, 80px);
+    font-weight: 800;
+    color: var(--ink-muted);
+    margin: 0;
+    line-height: 1;
+}
+
+.notFoundText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 15px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.notFoundLink {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    transition:
+        background 250ms ease,
+        color 250ms ease;
+}
+
+.notFoundLink:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .variantOption,
+    .addToCartBtn,
+    .tryOnLink,
+    .areaTag,
+    .galleryArrow,
+    .galleryDot,
+    .notFoundLink {
+        transition: none;
+    }
+
+    .variantOption:active,
+    .addToCartBtn:active {
+        transform: none;
+    }
+}

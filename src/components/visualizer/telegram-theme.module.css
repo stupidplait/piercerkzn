@@ -1,0 +1,48 @@
+/*
+ * Telegram theme bridge — only loaded by `app/visualizer/layout.tsx` when
+ * the request is inside the Mini-App iframe. Maps the seven Telegram
+ * theme variables (stamped onto `document.documentElement.style` by the
+ * client-side `<TelegramWebAppProvider>`) onto the storefront design
+ * tokens, so the visualizer adopts the user's Telegram light/dark theme
+ * natively.
+ *
+ * The `var(--tg-theme-*, var(--storefront-token))` form means a missing
+ * Telegram parameter falls back to the existing storefront token, so the
+ * bridge degrades gracefully if Telegram's surface evolves.
+ *
+ * Scoped to `.telegramThemed` so non-Mini storefront routes never see
+ * the Telegram theme variables — Requirement 8.3 is satisfied at the
+ * markup boundary, not via run-time guards.
+ */
+
+.telegramThemed {
+    /* Re-bind storefront tokens from Telegram theme params when present. */
+    --background: var(--tg-theme-bg-color, var(--background));
+    --foreground: var(--tg-theme-text-color, var(--foreground));
+    --muted-foreground: var(--tg-theme-hint-color, var(--muted-foreground));
+    --primary: var(--tg-theme-button-color, var(--primary));
+    --primary-foreground: var(--tg-theme-button-text-color, var(--primary-foreground));
+    --accent: var(--tg-theme-link-color, var(--accent));
+    --card: var(--tg-theme-secondary-bg-color, var(--card));
+
+    background: var(--tg-theme-bg-color, transparent);
+    color: var(--tg-theme-text-color, inherit);
+    min-height: 100vh;
+}
+
+/*
+ * Hide the cookie consent banner inside the Mini-App context. The banner
+ * exposes `data-pkzn-consent` on its dialog root (see
+ * `components/cookie-consent.tsx`) — we target it via that attribute so
+ * the layout-level chrome stripping is purely CSS.
+ *
+ * Scoped under `.telegramThemed` so this rule remains a CSS Module-pure
+ * selector (every selector must contain at least one local class). The
+ * `data-mini="1"` attribute lives on `<html>`, but with `.telegramThemed`
+ * applied to the visualizer wrapper inside the Mini-App layout, this
+ * scoped form has the same effective reach as the original
+ * `[data-mini="1"] [data-pkzn-consent]` rule.
+ */
+.telegramThemed [data-pkzn-consent] {
+    display: none !important;
+}

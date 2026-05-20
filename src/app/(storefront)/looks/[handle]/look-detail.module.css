@@ -1,0 +1,427 @@
+/* ============================================================
+   Look Detail Page — Steel Atelier design system
+   ============================================================ */
+
+/* ── Page shell ── */
+.lookDetailPage {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(32px, 5vw, 56px);
+}
+
+/* ── Hero section ── */
+.heroSection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(24px, 4vw, 48px);
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .heroSection {
+        grid-template-columns: 1fr;
+    }
+}
+
+.heroImage {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 2px;
+    overflow: hidden;
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.heroImg {
+    object-fit: cover;
+}
+
+.heroPlaceholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elev);
+}
+
+.heroPlaceholderText {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+.heroVignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(8, 8, 8, 0.5) 100%);
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+.heroInfo {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 2vw, 20px);
+}
+
+.lookTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(28px, 4.5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.15;
+}
+
+.lookDescription {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(14px, 1.2vw, 16px);
+    line-height: 1.6;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.bodyAreaBadge {
+    display: inline-flex;
+}
+
+.bodyAreaLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--bg-elev);
+}
+
+/* ── Pieces section ── */
+.piecesSection {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 2.5vw, 24px);
+}
+
+.sectionTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+}
+
+.piecesList {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+/* ── Piece row ── */
+.pieceRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: clamp(12px, 1.5vw, 16px) clamp(16px, 2vw, 24px);
+    background: rgba(8, 8, 8, 0.6);
+    transition: background 250ms ease;
+}
+
+.pieceRow:hover {
+    background: rgba(8, 8, 8, 0.8);
+}
+
+.pieceInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.pieceHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pieceProductTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 250ms ease;
+}
+
+.pieceProductTitle:hover {
+    color: var(--accent);
+}
+
+.piecePlacement {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    padding: 2px 8px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--bg-elev);
+    white-space: nowrap;
+}
+
+.pieceSpecs {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+}
+
+.piecePrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ── Pricing section ── */
+.pricingSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.pricingCard {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(20px, 3vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pricingRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.pricingRow:last-child {
+    border-bottom: none;
+}
+
+.pricingLabel {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+}
+
+.pricingValue {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+    text-decoration: line-through;
+}
+
+.pricingAccent {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.savingsValue {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    color: #4ade80;
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.savingsBadge {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 2px;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+/* ── Actions section ── */
+.actionsSection {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.reserveBtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 14px 32px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        background 250ms ease,
+        color 250ms ease,
+        transform 100ms ease;
+    text-align: center;
+}
+
+.reserveBtn:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.reserveBtn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.reserveBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.reserveBtnConfirm {
+    background: var(--accent);
+    color: var(--bg);
+    pointer-events: none;
+}
+
+.tryOnLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 10px 0;
+    transition: opacity 250ms ease;
+}
+
+.tryOnLink:hover {
+    opacity: 0.8;
+}
+
+.tryOnIcon {
+    font-size: 18px;
+}
+
+/* ── Not Found page ── */
+.notFoundPage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+}
+
+.notFoundCard {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(32px, 4vw, 48px);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.notFoundTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(48px, 8vw, 80px);
+    font-weight: 800;
+    color: var(--ink-muted);
+    margin: 0;
+    line-height: 1;
+}
+
+.notFoundText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 15px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.notFoundLink {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    transition:
+        background 250ms ease,
+        color 250ms ease;
+}
+
+.notFoundLink:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .pieceRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .actionsSection {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tryOnLink {
+        justify-content: center;
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .pieceRow,
+    .pieceProductTitle,
+    .reserveBtn,
+    .tryOnLink,
+    .notFoundLink {
+        transition: none;
+    }
+
+    .reserveBtn:active:not(:disabled) {
+        transform: none;
+    }
+}

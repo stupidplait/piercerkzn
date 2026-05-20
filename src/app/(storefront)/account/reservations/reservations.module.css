@@ -1,0 +1,176 @@
+/* ============================================================
+   Account Reservations — List page
+   Steel Atelier design tokens
+   ============================================================ */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 2.5vw, 32px);
+}
+
+.pageTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 700;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+}
+
+/* ── List ── */
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: clamp(14px, 1.5vw, 20px);
+    background: rgba(8, 8, 8, 0.6);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    transition: border-color 250ms ease;
+}
+
+.card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.refLink {
+    font-family: var(--font-mono), monospace;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent, #f06ba0);
+    text-decoration: none;
+    transition: opacity 250ms ease;
+}
+
+.refLink:hover {
+    opacity: 0.8;
+}
+
+.cardBody {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.itemCount {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+}
+
+.cardPrice {
+    font-family: var(--font-mono), monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent, #f06ba0);
+    letter-spacing: 0.1em;
+}
+
+.cardFooter {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cardMeta {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+}
+
+/* ── Status badge ── */
+.statusBadge {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.statusBadge[data-status="pending"] {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+}
+
+.statusBadge[data-status="confirmed"] {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.1);
+}
+
+.statusBadge[data-status="picked_up"] {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.1);
+}
+
+.statusBadge[data-status="cancelled"],
+.statusBadge[data-status="expired"] {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+}
+
+/* ── Empty state ── */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: clamp(32px, 4vw, 56px);
+    background: rgba(8, 8, 8, 0.4);
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    text-align: center;
+}
+
+.emptyText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted, rgba(240, 240, 240, 0.5));
+    margin: 0;
+}
+
+.ctaLink {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent, #f06ba0);
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid var(--accent, #f06ba0);
+    border-radius: 2px;
+    transition: background-color 250ms ease;
+}
+
+.ctaLink:hover {
+    background: rgba(240, 107, 160, 0.1);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .refLink,
+    .ctaLink {
+        transition: none;
+    }
+}

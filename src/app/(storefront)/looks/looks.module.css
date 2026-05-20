@@ -1,0 +1,363 @@
+/* ============================================================
+   Looks Gallery — Steel Atelier glass-panel cards
+   ============================================================ */
+
+/* ── Page shell ── */
+.looksPage {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 4vw, 40px);
+}
+
+.looksHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.looksTitle {
+    font-family: var(--font-display-new), system-ui, sans-serif;
+    font-size: clamp(28px, 4.5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+}
+
+.looksSubtitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: clamp(13px, 1.2vw, 15px);
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+/* ── Filter tabs ── */
+.filterPanel {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    padding: clamp(12px, 1.5vw, 16px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.filterLabel {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-right: 8px;
+}
+
+.filterTab {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 6px 14px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        background 250ms ease,
+        color 250ms ease;
+}
+
+.filterTab:hover {
+    border-color: var(--accent);
+}
+
+.filterTab:active {
+    transform: scale(0.98);
+}
+
+.filterTabActive {
+    composes: filterTab;
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(240, 107, 160, 0.1);
+}
+
+/* ── Grid container ── */
+.gridContainer {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 3vw, 32px);
+}
+
+/* ── Looks grid ── */
+.looksGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: clamp(12px, 2vw, 20px);
+}
+
+/* ── Look card (glass-panel) ── */
+.lookCard {
+    backdrop-filter: blur(28px) saturate(1.4);
+    background: rgba(8, 8, 8, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    transition:
+        border-color 250ms ease,
+        transform 250ms ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.lookCard:hover {
+    border-color: var(--accent);
+}
+
+.lookCard:active {
+    transform: scale(0.98);
+}
+
+.cardLink {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.cardThumbnail {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--bg-elev);
+}
+
+.cardThumbnailPlaceholder {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--bg-elev);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-muted);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+.cardBody {
+    padding: clamp(12px, 1.5vw, 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.cardTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cardMeta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cardPieceCount {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+.cardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.cardPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.discountBadge {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 2px;
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.paginationInfo {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+}
+
+.paginationBtn {
+    appearance: none;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 8px 16px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+        border-color 250ms ease,
+        color 250ms ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.paginationBtn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.paginationBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ── States ── */
+.loadingOverlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--ink-muted);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 200px;
+    text-align: center;
+    padding: 32px;
+}
+
+.emptyStateTitle {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+}
+
+.emptyStateText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.errorState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 200px;
+    text-align: center;
+    padding: 32px;
+}
+
+.errorText {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0;
+}
+
+.retryBtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 8px 20px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        background 250ms ease,
+        color 250ms ease;
+}
+
+.retryBtn:hover {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.retryBtn:active {
+    transform: scale(0.98);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .looksGrid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .filterPanel {
+        gap: 6px;
+    }
+
+    .filterTab,
+    .filterTabActive {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .lookCard,
+    .filterTab,
+    .filterTabActive,
+    .paginationBtn,
+    .retryBtn {
+        transition: none;
+    }
+}

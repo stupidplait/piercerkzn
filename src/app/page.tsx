@@ -1,7 +1,1 @@
-export default function Home() {
-  return (
-    <main>
-      <div>Hello world!</div>
-    </main>
-  );
-}
+export { default } from "./new-design/page";

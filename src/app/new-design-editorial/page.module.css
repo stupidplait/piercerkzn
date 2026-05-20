@@ -1,0 +1,326 @@
+/* ============================================================
+   Variant A — Editorial Showcase
+   Magazine-spread Chapter 1 + bridge beats overlay
+   ============================================================ */
+
+/* ── Bridge beats: tagline relay + chapter card flyup ── */
+
+.bridgeBeats {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    display: grid;
+    grid-template-rows: 1fr auto 1fr;
+    justify-items: center;
+    padding: clamp(80px, 12vh, 140px) clamp(24px, 4vw, 64px);
+}
+
+.bridgeTagline {
+    grid-row: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(11px, 1.05vw, 13px);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.92);
+    opacity: 0;
+    will-change: opacity, transform;
+}
+
+.bridgeTaglineMark {
+    color: var(--accent, #ff2d8a);
+    font-weight: 600;
+}
+
+.bridgeCard {
+    grid-row: 3;
+    align-self: end;
+    margin-bottom: clamp(12px, 2vh, 28px);
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    will-change: opacity, transform;
+}
+
+.bridgeCardKicker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent, #ff2d8a);
+}
+
+.bridgeCardRule {
+    width: 22px;
+    height: 1px;
+    background: rgba(240, 240, 240, 0.4);
+}
+
+.bridgeCardTitle {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+}
+
+/* ── Chapter 1: Editorial split layout ── */
+
+.editorialChapter {
+    /* Override the canonical .charSelect grid: split column instead of stacked */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    column-gap: clamp(40px, 6vw, 96px);
+    align-items: center;
+    padding: clamp(96px, 14vh, 160px) clamp(40px, 6vw, 96px) clamp(56px, 8vh, 96px);
+    pointer-events: auto;
+}
+
+@media (max-width: 880px) {
+    .editorialChapter {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        row-gap: clamp(24px, 4vh, 56px);
+        align-content: center;
+        padding: clamp(80px, 12vh, 120px) clamp(20px, 5vw, 40px);
+    }
+}
+
+/* Left column: editorial copy */
+
+.editorialCopy {
+    --p: var(--reveal-progress, 1);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 2.5vh, 28px);
+    max-width: 460px;
+    opacity: var(--p);
+    transform: translate3d(calc(-12px * (1 - var(--p))), 0, 0);
+    transition:
+        opacity 0.6s cubic-bezier(0.22, 0.9, 0.32, 1),
+        transform 0.6s cubic-bezier(0.22, 0.9, 0.32, 1);
+}
+
+.editorialKicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+}
+
+.editorialKickerNum {
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+}
+
+.editorialKickerRule {
+    width: 32px;
+    height: 1px;
+    background: rgba(240, 240, 240, 0.35);
+}
+
+.editorialKickerLabel {
+    color: rgba(240, 240, 240, 0.78);
+}
+
+.editorialHeading {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 5.4vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--ink, #f0f0f0);
+    margin: 0;
+}
+
+.editorialHeading em {
+    font-style: italic;
+    color: var(--accent, #ff2d8a);
+    font-weight: 700;
+}
+
+.editorialBody {
+    font-size: clamp(14px, 1.05vw, 16px);
+    line-height: 1.6;
+    color: rgba(240, 240, 240, 0.72);
+    max-width: 38ch;
+    margin: 0;
+}
+
+.editorialHint {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.5);
+    margin-top: 8px;
+}
+
+.editorialHintMark {
+    color: var(--accent, #ff2d8a);
+    font-size: 14px;
+}
+
+/* Right column: spec block + roster pips */
+
+.editorialSpec {
+    --p: var(--reveal-progress, 1);
+    justify-self: end;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 2.5vh, 28px);
+    align-items: flex-end;
+    text-align: right;
+    width: 100%;
+    max-width: 320px;
+    opacity: var(--p);
+    transform: translate3d(calc(12px * (1 - var(--p))), 0, 0);
+    transition:
+        opacity 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) 80ms,
+        transform 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) 80ms;
+}
+
+@media (max-width: 880px) {
+    .editorialSpec {
+        justify-self: center;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+.editorialSpecLine {
+    width: 64px;
+    height: 1px;
+    background: var(--accent, #ff2d8a);
+}
+
+.editorialSpecBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    align-items: inherit;
+    /* Animate on key change (jewelry swap) — clip-path mask reveal */
+    animation: specMaskIn 0.5s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+@keyframes specMaskIn {
+    from {
+        opacity: 0;
+        clip-path: inset(0 0 100% 0);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+.editorialSpecName {
+    font-family: var(--font-display-new), sans-serif;
+    font-weight: 800;
+    font-size: clamp(24px, 3.4vw, 40px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--ink, #f0f0f0);
+}
+
+.editorialSpecList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    align-items: inherit;
+}
+
+.editorialSpecRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 18px;
+    width: 100%;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.editorialSpecRow dt {
+    color: rgba(240, 240, 240, 0.45);
+}
+
+.editorialSpecRow dd {
+    color: rgba(240, 240, 240, 0.92);
+    margin: 0;
+}
+
+.editorialSpecPrice {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: clamp(15px, 1.3vw, 18px);
+    letter-spacing: 0.16em;
+    color: var(--accent, #ff2d8a);
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+/* Roster pips */
+
+.editorialPips {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.editorialPip {
+    width: 28px;
+    height: 2px;
+    border: 0;
+    padding: 0;
+    background: rgba(240, 240, 240, 0.18);
+    cursor: pointer;
+    transition:
+        background 0.3s ease,
+        height 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.editorialPip:hover {
+    background: rgba(240, 240, 240, 0.4);
+}
+
+.editorialPip[data-active="true"] {
+    background: var(--accent, #ff2d8a);
+    height: 3px;
+    box-shadow: 0 0 12px rgba(255, 45, 138, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bridgeTagline,
+    .bridgeCard,
+    .editorialCopy,
+    .editorialSpec,
+    .editorialSpecBlock {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+}
