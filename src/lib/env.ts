@@ -35,10 +35,10 @@ const isProd = process.env.NODE_ENV === "production";
 const requiredInProd = (label: string) =>
     z
         .string()
-        .min(1)
         .optional()
+        .transform((v) => (v && v.trim().length > 0 ? v.trim() : undefined))
         .superRefine((v, ctx) => {
-            if (isProd && (!v || v.trim().length === 0)) {
+            if (isProd && !v) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: `${label} is required in production`,
@@ -50,21 +50,34 @@ const requiredInProd = (label: string) =>
  * Rate-limit window strings as understood by `@upstash/ratelimit`:
  * `<positive integer><whitespace><unit>`, where unit is `s`, `m`, `h`, or `d`.
  * Examples: `"30 s"`, `"5 m"`, `"1 h"`, `"7 d"`.
+ * Empty strings are treated as unset (returns undefined).
  */
 export const windowSchema = z
     .string()
-    .regex(/^\d+\s+[smhd]$/, "expected `<n> s|m|h|d`")
-    .optional();
+    .optional()
+    .transform((v) => (v && v.trim().length > 0 ? v.trim() : undefined))
+    .pipe(
+        z
+            .string()
+            .regex(/^\d+\s+[smhd]$/, "expected `<n> s|m|h|d`")
+            .optional()
+    );
 
 /**
  * Numeric env override: accept a digits-only string and coerce to `number`.
- * Anything else (empty, negative sign, decimals) fails the parse.
+ * Empty strings are treated as unset (returns undefined).
  */
 export const intLikeSchema = z
     .string()
-    .regex(/^\d+$/)
-    .transform((v) => Number(v))
-    .optional();
+    .optional()
+    .transform((v) => (v && v.trim().length > 0 ? v.trim() : undefined))
+    .pipe(
+        z
+            .string()
+            .regex(/^\d+$/)
+            .transform((v) => Number(v))
+            .optional()
+    );
 
 export const envSchema = z
     .object({
